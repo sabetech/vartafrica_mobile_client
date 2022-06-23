@@ -5,8 +5,9 @@ export const fetchDashboardValues = createAsyncThunk('dashboard/fetchdata', asyn
     try {
       const response = await getDashboardValues(token);
       
-      if (response.success) {
+      if (response.sucess) {
         const { data } = response;
+        
         return data;
       }
       

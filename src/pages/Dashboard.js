@@ -1,10 +1,11 @@
 import React, { useContext, useEffect } from "react";
-import { ScrollView, View } from 'react-native';
+import { ScrollView, View, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import DashboardCard from "../components/DashboardCard";
 import { FloatingAction } from "react-native-floating-action";
 import { AuthContext } from "../context/AuthContext";
 import { fetchDashboardValues, getAllDashboardValues, getStatus } from '../redux/vartafrica';
+import MainMenuItem from "../components/MainMenuButton";
 
 
 
@@ -47,13 +48,20 @@ export default function Dashboard ({ navigation }) {
         }
       ]
     return( 
-        <View>
-            <ScrollView>
-                <DashboardCard title={"Number of Registered Farmers"} icon={"body-outline"} value={dashboardValues?.farmer_count || 0 } />
-                <DashboardCard title={"Quantity of Orders"} icon={"body-outline"} value={dashboardValues?.total_orders || 0 } />
-                <DashboardCard title={"Total Savings"} icon={"add-outline"} value={dashboardValues?.total_savings || 0 } />
-                <DashboardCard title={"Deductions"} icon={"add-outline"} value={dashboardValues?.total_deductions || 0 } />
-            </ScrollView>
+        <View style={{padding: 10, flex: 1}}>
+            <View style={styles.dashboardlist}>
+                <DashboardCard title={"Number of Registered Farmers"} value={dashboardValues?.farmer_count || 0 } />
+                <DashboardCard title={"Quantity of Orders"} value={dashboardValues?.total_orders || 0 } />
+                <DashboardCard title={"Total Savings"} value={dashboardValues?.total_savings || 0 } />
+                <DashboardCard title={"Deductions"} value={dashboardValues?.total_deductions || 0 } />
+            </View>
+            
+            <View style={ styles.menuItems }>
+                <MainMenuItem title={"List Farmers"} navigation={navigation} />
+                <MainMenuItem title={"List Orders"} navigation={navigation} />
+                <MainMenuItem title={"Cards Used"}  navigation={navigation} />
+                <MainMenuItem title={"List of Deductions"} navigation={navigation} />
+            </View>
             <FloatingAction
                 actions={actions}
                 onPressItem={name => {
@@ -80,3 +88,21 @@ export default function Dashboard ({ navigation }) {
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    dashboardlist: {
+        marginTop: 10,
+        height: '50%',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'flex-start',
+        alignContent: 'flex-start',
+        justifyContent: 'center'
+    },
+    menuItems: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        alignContent: 'flex-start',
+
+    }
+});

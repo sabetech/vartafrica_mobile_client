@@ -9,13 +9,13 @@ import Dashboard from "./src/pages/Dashboard";
 import RegisterFarmer from "./src/pages/RegisterFarmer";
 import NewFarmerDebit from "./src/pages/NewFarmerDebit";
 import CardRecharge from "./src/pages/CardRecharge";
+import Listings from "./src/pages/Listings";
 import { AuthContext } from "./src/context/AuthContext";
 
 const Stack = createNativeStackNavigator();
 
 function App () {
   const [ user, setUser ] = useState(null);
-
   return (
     <Provider store={configureStore}>
       <AuthContext.Provider value={{user, setUser}}>
@@ -37,6 +37,7 @@ function App () {
                                               }} />
                   <Stack.Screen name="NewFarmerDebit" component={ NewFarmerDebit } />
                   <Stack.Screen name="CardRecharge" component={ CardRecharge } />
+                  <Stack.Screen name="Listings" component={ Listings } />
                 </>
               )                            
               }

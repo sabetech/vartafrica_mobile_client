@@ -6,25 +6,32 @@
  * @flow strict-local
  */
 
- import React, { useContext } from 'react';
- import { SafeAreaView, StyleSheet, TextInput, Button, View, Text, TouchableOpacity } from 'react-native';
+ import React, { useContext, useEffect, useState } from 'react';
+ import { SafeAreaView, StyleSheet, TextInput, ActivityIndicator, View, Text, TouchableOpacity } from 'react-native';
  import { AuthContext } from '../context/AuthContext';
  import { login } from '../services/api';
 
  export default function Login ({ navigation }) {
 
     const { user, setUser } = useContext(AuthContext);
-    const [username, onChangeUsername] = React.useState('');
-    const [password, onChangePassword] = React.useState('');
+    const [username, onChangeUsername] = useState('');
+    const [password, onChangePassword] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (user != null) navigation.navigate('Dashboard');
+    });
 
  const signIn = async () => {
      //authenticate get a token and move on
+     setLoading(true);
      if (user != null) navigation.navigate('Dashboard');
 
      const loggedUser = await login({username, password});
      
      if (loggedUser.success){
         await setUser(loggedUser);
+        console.log(loggedUser);
         navigation.navigate('Dashboard');
      } else {
         console.log("AN ERROR OCCURED");
@@ -45,7 +52,11 @@
                 secureTextEntry={true}
             />
             <TouchableOpacity style={styles.submitButton} onPress={signIn}>
-                <Text style={ styles.submitText }>Sign In</Text>
+                {
+                    loading ? 
+                    <ActivityIndicator /> : <Text style={ styles.submitText }>Sign In</Text>
+                }
+                
             </TouchableOpacity>
             
         </SafeAreaView>

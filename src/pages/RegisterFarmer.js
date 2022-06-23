@@ -151,6 +151,8 @@ export default function RegisterFarmer({ navigation }) {
             token: user.token
         }
         
+        console.log(user.token);
+        
         dispatch(registerFarmerThunk(thunkArgs));
         
     }

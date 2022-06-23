@@ -1,24 +1,36 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { CardViewWithIcon } from "react-native-simple-card-view";
+import { StyleSheet, View, Text, Image } from 'react-native';
 
-const DashboardCard = ({title, value, icon}) => {
+const DashboardCard = ({ title, value }) => {
 
-    return <CardViewWithIcon  
-    withBackground={ true }
-    androidIcon={ 'md-jet' }
-    title={ title }
-    contentFontSize={ 20 }
-    titleFontSize={ 15 }
-    content={ value + '' }
-    style={styles.cardStyle}
-    roundedIconBg={true}
-    />
+    return (
+        <View style={styles.cardStyle}>
+            <Text style={styles.valueText}>{ value }</Text>
+            <Text style={styles.titleText}>{ title }</Text>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
     cardStyle : {
-        width: '90%',
+        width: '40%',
+        height: 120,
+        borderWidth: 1,
+        marginHorizontal: 5,
+        marginVertical: 10,
+        borderRadius: 10,
+        flexDirection: 'column',        
+        justifyContent: 'center',
+        alignContent: 'center'
+    },
+    titleText: {
+        textAlign: 'center',
+        fontSize: 12,
+        fontFamily: 'Roboto'
+    },
+    valueText: {
+        fontSize: 18,
+        textAlign: 'center'
     }
 })
 
