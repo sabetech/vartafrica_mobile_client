@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { ScrollView, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import DashboardCard from "../components/DashboardCard";
 import { FloatingAction } from "react-native-floating-action";
@@ -82,7 +82,6 @@ export default function Dashboard ({ navigation }) {
                             navigation.navigate('FarmerOrders');
                         break;
                     }
-                    console.log(`selected button: ${name}`);
                 }}
             />
         </View>

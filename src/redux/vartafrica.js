@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getDashboardValues, registerFarmer } from '../services/api'
+import { getDashboardValues, registerFarmer, getFarmersByAgent } from '../services/api'
 
 export const fetchDashboardValues = createAsyncThunk('dashboard/fetchdata', async (token) => {
     try {
@@ -31,11 +31,42 @@ export const registerFarmerThunk = createAsyncThunk('farmer/register', async ({n
   }
 }); 
 
+export const getAllFarmersByAgent = createAsyncThunk('farmer/list', async ({ agent_id, token }) => {
+  try {
+    console.log(token);
+    const response = await getFarmersByAgent(agent_id, token);
+    console.log(response);
+    if (response.success) {
+      const { data } = response;
+      
+      return data;
+    }
+
+  } catch ( err ) {
+    return err.message;
+  }
+});
+
+export const getAllOrdersByAgent = createAsyncThunk('agent/orders', async ({ agent_id, token }) => {
+  try {
+
+    const response = await getFarmersByAgent(agent_id, token);
+    if (response.success) {
+      const { data } = response;
+      return data;
+    }
+
+  } catch ( err ) {
+    return err.message;
+  }
+});
+
   export const varfAfricaSlice = createSlice({
     name: 'vart_africa_slice',
     initialState: {
         dashboard_values: {},
         registeredFarmers: [],
+        farmerOrders: [],
         status: 'idle',
         success_msg: '',
         error: null,
@@ -68,13 +99,25 @@ export const registerFarmerThunk = createAsyncThunk('farmer/register', async ({n
         .addCase(registerFarmerThunk.rejected, (state, action) => {
           state.status = 'failed';
           state.error = action.error.message;
+        })
+        .addCase(getAllFarmersByAgent.pending, (state) => {
+          state.status = 'loading';
+        })
+        .addCase(getAllFarmersByAgent.fulfilled, (state, action) => {
+          state.status = 'listings-success';
+          state.registeredFarmers = action.payload;
+        })
+        .addCase(getAllFarmersByAgent.rejected, (state, action) => {
+          state.status = 'failed';
+          state.error = action.error.message;
         });
     }
   });
 
   export const { setIdle } = varfAfricaSlice.actions;
   export const getAllDashboardValues = (state) => state.vartafrica.dashboard_values;
-  export const getAllRegisteredFarmers = (state) => state.vartafrica.registeredFarmers
+  export const getAllRegisteredFarmers = (state) => state.vartafrica.registeredFarmers;
+  export const getAllFarmerOrders = (state) => state.vartafrica.farmerOrders;
   export const getStatus = (state) => state.vartafrica.status;
   export const getError = (state) => state.vartafrica.error;
 

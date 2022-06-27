@@ -37,10 +37,82 @@ export const registerFarmer = async (newFarmer, token) => {
     }
 }
 
+export const getFarmersByAgent = async (token) => {
+    try {
+        const response = await axios({
+            url: `${baseUrl}farmerslist`,
+            method: 'GET',
+            mode:'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': token
+            }
+        })
+
+        return response.json();
+    } catch ( e ) {
+        throw new Error(e.message());
+    }
+}
+
 export const getDashboardValues = async (token) => {
     try {
         const response = await axios({
             url: `${baseUrl}dashboard`,
+            method: 'GET',
+            mode:'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': token
+              }
+        });
+        
+        return response.data;
+    }catch( e ){
+        throw new Error(e.message());
+    }
+}
+
+export const getOrdersByAgent = async (token) => {
+    try {
+        const response = await axios({
+            url: `${baseUrl}orders-by-agent`,
+            method: 'GET',
+            mode:'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': token
+              }
+        });
+        
+        return response.data;
+    }catch( e ){
+        throw new Error(e.message());
+    }
+}
+
+export const getUsedCardsByAgent = async (token) => {
+    try {
+        const response = await axios({
+            url: `${baseUrl}used-cards-by-agent`,
+            method: 'GET',
+            mode:'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': token
+              }
+        });
+        
+        return response.data;
+    }catch( e ){
+        throw new Error(e.message());
+    }
+}
+
+export const getListOfDeductions = async (token) => {
+    try {
+        const response = await axios({
+            url: `${baseUrl}list-of-deductions`,
             method: 'GET',
             mode:'no-cors',
             headers: {

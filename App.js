@@ -9,6 +9,7 @@ import Dashboard from "./src/pages/Dashboard";
 import RegisterFarmer from "./src/pages/RegisterFarmer";
 import NewFarmerDebit from "./src/pages/NewFarmerDebit";
 import CardRecharge from "./src/pages/CardRecharge";
+import FarmerOrders from "./src/pages/FarmerOrders";
 import Listings from "./src/pages/Listings";
 import { AuthContext } from "./src/context/AuthContext";
 
@@ -35,8 +36,19 @@ function App () {
                                 headerShown: true, 
                                 headerTitle:"Register Farmer"
                                               }} />
-                  <Stack.Screen name="NewFarmerDebit" component={ NewFarmerDebit } />
-                  <Stack.Screen name="CardRecharge" component={ CardRecharge } />
+
+                  <Stack.Screen name="FarmerOrders" component={ FarmerOrders } options={{
+                                headerShown: true, 
+                                headerTitle:"Farmer Order"
+                                              }} />
+                  <Stack.Screen name="NewFarmerDebit" component={ NewFarmerDebit } options={{
+                                headerShown: true, 
+                                headerTitle:"New Farmer Debit"
+                                              }} />
+                  <Stack.Screen name="CardRecharge" component={ CardRecharge } options={{
+                                headerShown: true, 
+                                headerTitle:"Card Recharge"
+                                              }}/>
                   <Stack.Screen name="Listings" component={ Listings } />
                 </>
               )                            
