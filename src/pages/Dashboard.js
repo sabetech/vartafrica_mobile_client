@@ -99,9 +99,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     menuItems: {
+        justifyContent:'center',
         flexDirection: 'row',
         alignItems: 'flex-start',
         alignContent: 'flex-start',
+        flexWrap: 'wrap'
 
     }
 });

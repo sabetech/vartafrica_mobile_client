@@ -4,8 +4,8 @@ import { getDashboardValues, registerFarmer, getFarmersByAgent } from '../servic
 export const fetchDashboardValues = createAsyncThunk('dashboard/fetchdata', async (token) => {
     try {
       const response = await getDashboardValues(token);
-      
-      if (response.sucess) {
+      console.log("dashboard values:" , response.data)
+      if (response.success) {
         const { data } = response;
         
         return data;
@@ -31,13 +31,12 @@ export const registerFarmerThunk = createAsyncThunk('farmer/register', async ({n
   }
 }); 
 
-export const getAllFarmersByAgent = createAsyncThunk('farmer/list', async ({ agent_id, token }) => {
+export const getAllFarmersByAgent = createAsyncThunk('farmer/list', async (token) => {
   try {
-    console.log(token);
-    const response = await getFarmersByAgent(agent_id, token);
-    console.log(response);
-    if (response.success) {
-      const { data } = response;
+    const response = await getFarmersByAgent(token);
+    
+    if (response.data.success) {
+      const { data } = response.data;
       
       return data;
     }
@@ -47,10 +46,11 @@ export const getAllFarmersByAgent = createAsyncThunk('farmer/list', async ({ age
   }
 });
 
-export const getAllOrdersByAgent = createAsyncThunk('agent/orders', async ({ agent_id, token }) => {
+export const getAllOrdersByAgent = createAsyncThunk('agent/orders', async ( token ) => {
   try {
-
-    const response = await getFarmersByAgent(agent_id, token);
+    console.log(token);
+    const response = await getOrdersByAgent(token);
+    console.log("ORDERS:", response.data);
     if (response.success) {
       const { data } = response;
       return data;
@@ -79,7 +79,7 @@ export const getAllOrdersByAgent = createAsyncThunk('agent/orders', async ({ age
     extraReducers(builder) {
         builder
         .addCase(fetchDashboardValues.pending, (state) => {
-            state.status = 'loading';
+            state.status = 'dasloading';
           })
         .addCase(fetchDashboardValues.fulfilled, (state, action) => {
             state.status = 'dashboard-values-succeeded';
@@ -90,7 +90,7 @@ export const getAllOrdersByAgent = createAsyncThunk('agent/orders', async ({ age
             state.error = action.error.message;
         })
         .addCase(registerFarmerThunk.pending, (state) => {
-          state.status = 'loading';
+          state.status = 'regloading';
         })
         .addCase(registerFarmerThunk.fulfilled, (state, action) => {
           state.status = 'register-farmer-success';
@@ -101,7 +101,7 @@ export const getAllOrdersByAgent = createAsyncThunk('agent/orders', async ({ age
           state.error = action.error.message;
         })
         .addCase(getAllFarmersByAgent.pending, (state) => {
-          state.status = 'loading';
+          state.status = 'getfrmloading';
         })
         .addCase(getAllFarmersByAgent.fulfilled, (state, action) => {
           state.status = 'listings-success';

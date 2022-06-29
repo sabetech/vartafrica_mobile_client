@@ -48,8 +48,7 @@ export const getFarmersByAgent = async (token) => {
                 'token': token
             }
         })
-
-        return response.json();
+        return response;
     } catch ( e ) {
         throw new Error(e.message());
     }
@@ -76,7 +75,7 @@ export const getDashboardValues = async (token) => {
 export const getOrdersByAgent = async (token) => {
     try {
         const response = await axios({
-            url: `${baseUrl}orders-by-agent`,
+            url: `${baseUrl}orderlist`,
             method: 'GET',
             mode:'no-cors',
             headers: {
@@ -85,7 +84,7 @@ export const getOrdersByAgent = async (token) => {
               }
         });
         
-        return response.data;
+        return response;
     }catch( e ){
         throw new Error(e.message());
     }

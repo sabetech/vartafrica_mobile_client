@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux'; 
 import { AuthContext } from "../context/AuthContext"
 import { getAllFarmersByAgent, getAllRegisteredFarmers, getAllFarmerOrders, getAllOrdersByAgent, getStatus, setIdle } from '../redux/vartafrica';
 
@@ -15,6 +15,7 @@ export default function Listings ({ route, navigation }) {
     const { title } = route.params;    
     useEffect(() => {
         navigation.setOptions({headerTitle: title, headerShown: true});
+        console.log("STATE: ", status);
         dispatch(setIdle())
     }, []);
     
@@ -26,15 +27,24 @@ export default function Listings ({ route, navigation }) {
                 if (status === 'idle') {
                     dispatch(getAllFarmersByAgent(user.token));
                 }
+                if (status === 'listings-success') {
+                    setData(registeredFarmers);
+                }
             break;
             case 'List Orders':
                 if (status === 'idle') {
                     dispatch(getAllOrdersByAgent(user.token));
                 }
+                if (status === 'listings-success') {
+                    setData(farmerOrders);
+                }
             break;
             case 'Cards Used':
                 if (status === 'idle') {
 
+                }
+                if (status === 'listings-success') {
+                    setData(farmerOrders);
                 }
             break;
             case 'List of Deductions':
@@ -44,9 +54,7 @@ export default function Listings ({ route, navigation }) {
             break;
         }
 
-        if (status === 'listings-success') {
-            setData(registeredFarmers)
-        }
+        
 
     },[dispatch, status]);
 
@@ -54,7 +62,7 @@ export default function Listings ({ route, navigation }) {
         <View>
             <FlatList 
                 data={data}
-                renderItem={({item}) => <Text style={styles.item}>{item.key}</Text>}
+                renderItem={({item}) => <Text style={styles.item}>{item.name} {item.last_name}</Text>}
             />
         </View>
     )

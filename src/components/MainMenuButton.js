@@ -10,7 +10,7 @@ const MainMenuItem = ({ navigation, title }) => {
 
     return (
         <View style={styles.mainMenuButton}>
-            <TouchableOpacity onPress={() => handleMenuItemPress()}>
+            <TouchableOpacity onPress={() => handleMenuItemPress()} style={styles.buttonStyle}>
                 <Text style={ styles.textStyle }>{ title }</Text>
             </TouchableOpacity>
         </View>
@@ -19,16 +19,28 @@ const MainMenuItem = ({ navigation, title }) => {
 
 const styles =  StyleSheet.create({
     mainMenuButton: {
-        borderWidth: 1,
         borderRadius: 10,
-        height: 70,
-        width: 75,
         marginHorizontal: 10,
-        justifyContent:'center'
+        width: 140
     },
     textStyle: {
-        textAlign: 'center',
+        textAlign: "center",
+        color: "white",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    buttonStyle: {
+        elevation: 8,
+        backgroundColor: "#112233",
+        borderRadius: 10,
+        paddingVertical: 20,
+        paddingHorizontal: 12,
+        height: 80,
+        width: '100%',
+        marginVertical: 15,
+        marginHorizontal:15
     }
+    
 }); 
 
 export default MainMenuItem;

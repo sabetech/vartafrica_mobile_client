@@ -14,8 +14,8 @@
  export default function Login ({ navigation }) {
 
     const { user, setUser } = useContext(AuthContext);
-    const [username, onChangeUsername] = useState('');
-    const [password, onChangePassword] = useState('');
+    const [username, onChangeUsername] = useState('admin@admin.com');
+    const [password, onChangePassword] = useState('admin123');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
