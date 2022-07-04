@@ -75,7 +75,7 @@ export default function NewFarmerDebit({ navigation }) {
     }
 
     return (
-        <View>
+        <View style={{padding: 10, flex: 1}}>
             <Text style={styles.topTitle}>Farmer Debit</Text>
             <Text>Select Farmer</Text>
                 <Picker

@@ -3,13 +3,23 @@ import { View, Text, FlatList, StyleSheet } from "react-native";
 import { useDispatch, useSelector } from 'react-redux'; 
 import { AuthContext } from "../context/AuthContext"
 import { useIsFocused } from "@react-navigation/native";
-import { getAllFarmersByAgent, getAllRegisteredFarmers, getAllFarmerOrders, getAllOrdersByAgent, getStatus, setIdle } from '../redux/vartafrica';
+import { getAllFarmersByAgent, 
+        getAllRegisteredFarmers, 
+        getAllFarmerOrders, 
+        getAllOrdersByAgent, 
+        deductionlist,
+        getAllDeductions,
+        getAllCardsUsed,
+        cardsUsed,
+        getStatus, setIdle } from '../redux/vartafrica';
 
 export default function Listings ({ route, navigation }) {
     const [ data, setData ] = useState([]);
     const dispatch = useDispatch();
     const registeredFarmers = useSelector(getAllRegisteredFarmers);
     const farmerOrders = useSelector(getAllFarmerOrders);
+    const deductions = useSelector(getAllDeductions);
+    const cardsUsedList = useSelector(getAllCardsUsed);
     const status = useSelector(getStatus);
     const { user } = useContext(AuthContext);
     const isFocused = useIsFocused();
@@ -46,9 +56,8 @@ export default function Listings ({ route, navigation }) {
                 if (status === 'idle') {
                     dispatch(getAllOrdersByAgent(user.token));
                 }
-                console.log("LISTING:",status);
                 if (status === 'listings-success') {
-                    setData((prev) => [...farmerOrders.map(
+                    setData((prev) => [...prev, ...farmerOrders.map(
                                                     order => ({
                                                             title: `${order.name} (${order.variety})`,
                                                             subTitle: `QTY: ${order.quantity_ordered}`
@@ -57,15 +66,30 @@ export default function Listings ({ route, navigation }) {
             break;
             case 'Cards Used':
                 if (status === 'idle') {
-                    
+                    dispatch(cardsUsed(user.token));
                 }
                 if (status === 'listings-success') {
-                    setData(farmerOrders);
+                    setData((prev) => [...prev, ...cardsUsedList.map(
+                        cardsUsedListItem => (
+                            {
+                                
+                            }
+                        )
+                    )]);
                 }
             break;
             case 'List of Deductions':
                 if (status === 'idle') {
-                    
+                    dispatch(deductionlist(user.token));
+                }
+                console.log(deductions);
+                if (status === 'listings-success') {
+                    setData((prev) => [...prev, ...deductions.map(
+                        deduction => ({
+                            title: deduction.username,
+                            subTitle: deduction.amount
+                        })
+                    )]);
                 }
             break;
         }

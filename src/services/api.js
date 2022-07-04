@@ -93,7 +93,7 @@ export const getOrdersByAgent = async (token) => {
 export const getUsedCardsByAgent = async (token) => {
     try {
         const response = await axios({
-            url: `${baseUrl}used-cards-by-agent`,
+            url: `${baseUrl}cardused`,
             method: 'GET',
             mode:'no-cors',
             headers: {
@@ -111,7 +111,7 @@ export const getUsedCardsByAgent = async (token) => {
 export const getListOfDeductions = async (token) => {
     try {
         const response = await axios({
-            url: `${baseUrl}list-of-deductions`,
+            url: `${baseUrl}deductionlist`,
             method: 'GET',
             mode:'no-cors',
             headers: {

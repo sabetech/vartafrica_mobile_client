@@ -21,7 +21,7 @@ export default function Dashboard ({ navigation }) {
         if(isFocused){ 
             dispatch(setIdle());
         }
-    }, [    isFocused]);
+    }, [isFocused]);
 
     useEffect(() => {
         if (status === 'idle') {

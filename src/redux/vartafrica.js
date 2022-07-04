@@ -6,7 +6,9 @@ import {
   saveOrderByAgentAPI, 
   getOrdersByAgent, 
   saveFarmerDebitAPI,
-  rechargeAPI
+  rechargeAPI,
+  getListOfDeductions,
+  getUsedCardsByAgent
 } from '../services/api'
 
 export const fetchDashboardValues = createAsyncThunk('dashboard/fetchdata', async (token) => {
@@ -56,9 +58,7 @@ export const getAllFarmersByAgent = createAsyncThunk('farmer/list', async (token
 
 export const getAllOrdersByAgent = createAsyncThunk('agent/orders', async ( token ) => {
   try {
-    console.log(token);
     const response = await getOrdersByAgent(token);
-    console.log("ORDERS:", response);
     if (response.success) {
       const { data } = response;
       return data;
@@ -80,6 +80,19 @@ export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {o
       console.log(err.message);
       return err.message;
     }
+});
+
+export const getAllFarmerDebits = createAsyncThunk('agent/orders', async ( token ) => {
+  try {
+    const response = await getOrdersByAgent(token);
+    if (response.success) {
+      const { data } = response;
+      return data;
+    }
+
+  } catch ( err ) {
+    return err.message;
+  }
 });
 
 export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { debit, token} ) => {
@@ -104,12 +117,36 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
   }
 });
 
+export const cardsUsed = createAsyncThunk('agent/farmer/cardsused', async ( { rechargeInfo, token} ) => {
+  
+  try{
+    const response = await getUsedCardsByAgent( token );
+    return response;
+  }catch( err ){
+    console.log(err.message);
+    return err.message;
+  }
+});
+
+export const deductionlist = createAsyncThunk('agent/debit/list', async ( token ) => {
+  
+  try{
+    const response = await getListOfDeductions(token);
+    return response.data;
+  }catch( err ){
+    console.log(err.message);
+    return err.message;
+  }
+});
+
   export const varfAfricaSlice = createSlice({
     name: 'vart_africa_slice',
     initialState: {
         dashboard_values: {},
         registeredFarmers: [],
         farmerOrders: [],
+        cardsUsed: [],
+        deductions: [],
         status: 'idle',
         success: false,
         success_msg: '',
@@ -200,7 +237,29 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
         .addCase(recharge.rejected, (state, action) => {
           state.status = 'failed';
           state.error = action.error.message;
-        });;
+        })
+        .addCase(cardsUsed.pending, (state) => {
+          state.status = 'loading';
+        })
+        .addCase(cardsUsed.fulfilled, (state, action) => {
+          state.status = 'listings-success';
+          state.cardsUsed = action.payload;
+        })
+        .addCase(cardsUsed.rejected, (state, action) => {
+          state.status = 'failed';
+          state.error = action.error.message;
+        })
+        .addCase(deductionlist.pending, (state) => {
+          state.status = 'loading';
+        })
+        .addCase(deductionlist.fulfilled, (state, action) => {
+          state.status = 'listings-success';
+          state.deductions = action.payload;
+        })
+        .addCase(deductionlist.rejected, (state, action) => {
+          state.status = 'failed';
+          state.error = action.error.message;
+        });
     }
   });
 
@@ -208,6 +267,8 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
   export const getAllDashboardValues = (state) => state.vartafrica.dashboard_values;
   export const getAllRegisteredFarmers = (state) => state.vartafrica.registeredFarmers;
   export const getAllFarmerOrders = (state) => state.vartafrica.farmerOrders;
+  export const getAllDeductions = (state) => state.vartafrica.deductions;
+  export const getAllCardsUsed = (state) => state.vartafrica.cardsUsed;
   export const getStatus = (state) => state.vartafrica.status;
   export const getError = (state) => state.vartafrica.error;
   export const getSuccess = (state) => state.vartafrica.success;
