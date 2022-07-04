@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React from "react"
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
 const MainMenuItem = ({ navigation, title }) => {
 
@@ -37,8 +37,7 @@ const styles =  StyleSheet.create({
         paddingHorizontal: 12,
         height: 80,
         width: '100%',
-        marginVertical: 15,
-        marginHorizontal:15
+        marginVertical: 15        
     }
     
 }); 

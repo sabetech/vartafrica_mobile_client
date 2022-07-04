@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { TextInput } from 'react-native-element-textinput';
 import Geolocation from 'react-native-geolocation-service';
 import { AuthContext } from "../context/AuthContext";
@@ -53,8 +53,7 @@ export default function RegisterFarmer({ navigation }) {
         console.log(status)
         if (status == 'register-farmer-success'){
             Alert.alert("Success", "Farmer Registered Successfully");
-            dispatch(setIdle());
-            
+            dispatch(setIdle());        
         }
         console.log(status);
         if (status == 'idle') {
@@ -150,9 +149,7 @@ export default function RegisterFarmer({ navigation }) {
             newFarmer,
             token: user.token
         }
-        
-        console.log(user.token);
-        
+
         dispatch(registerFarmerThunk(thunkArgs));
         
     }

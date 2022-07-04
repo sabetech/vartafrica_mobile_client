@@ -1,5 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getDashboardValues, registerFarmer, getFarmersByAgent } from '../services/api'
+import { 
+  getDashboardValues, 
+  registerFarmer, 
+  getFarmersByAgent, 
+  saveOrderByAgentAPI, 
+  getOrdersByAgent, 
+  saveFarmerDebitAPI } from '../services/api'
 
 export const fetchDashboardValues = createAsyncThunk('dashboard/fetchdata', async (token) => {
     try {
@@ -17,7 +23,7 @@ export const fetchDashboardValues = createAsyncThunk('dashboard/fetchdata', asyn
     }
 });
 
-export const registerFarmerThunk = createAsyncThunk('farmer/register', async ({newFarmer, token}) => {
+export const registerFarmerThunk = createAsyncThunk('farmer/register', async ({ newFarmer, token }) => {
   try {
     const response = await registerFarmer(newFarmer, token);
     
@@ -50,13 +56,37 @@ export const getAllOrdersByAgent = createAsyncThunk('agent/orders', async ( toke
   try {
     console.log(token);
     const response = await getOrdersByAgent(token);
-    console.log("ORDERS:", response.data);
+    console.log("ORDERS:", response);
     if (response.success) {
       const { data } = response;
       return data;
     }
 
   } catch ( err ) {
+    return err.message;
+  }
+});
+
+export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {order, token} ) => {
+  try{
+      const response = await saveOrderByAgentAPI(order, token);
+      if (response.success) {
+        const { message } = response;
+        return message;
+      }
+    }catch( err ){
+      console.log(err.message);
+      return err.message;
+    }
+});
+
+export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { debit, token} ) => {
+  console.log("Dedib",debit);
+  try{
+    const response = await saveFarmerDebitAPI(debit, token);
+    return response;
+  }catch( err ){
+    console.log(err.message);
     return err.message;
   }
 });
@@ -68,6 +98,7 @@ export const getAllOrdersByAgent = createAsyncThunk('agent/orders', async ( toke
         registeredFarmers: [],
         farmerOrders: [],
         status: 'idle',
+        success: false,
         success_msg: '',
         error: null,
     },
@@ -79,7 +110,7 @@ export const getAllOrdersByAgent = createAsyncThunk('agent/orders', async ( toke
     extraReducers(builder) {
         builder
         .addCase(fetchDashboardValues.pending, (state) => {
-            state.status = 'dasloading';
+            state.status = 'loading';
           })
         .addCase(fetchDashboardValues.fulfilled, (state, action) => {
             state.status = 'dashboard-values-succeeded';
@@ -90,7 +121,7 @@ export const getAllOrdersByAgent = createAsyncThunk('agent/orders', async ( toke
             state.error = action.error.message;
         })
         .addCase(registerFarmerThunk.pending, (state) => {
-          state.status = 'regloading';
+          state.status = 'loading';
         })
         .addCase(registerFarmerThunk.fulfilled, (state, action) => {
           state.status = 'register-farmer-success';
@@ -101,13 +132,47 @@ export const getAllOrdersByAgent = createAsyncThunk('agent/orders', async ( toke
           state.error = action.error.message;
         })
         .addCase(getAllFarmersByAgent.pending, (state) => {
-          state.status = 'getfrmloading';
+          state.status = 'loading';
         })
         .addCase(getAllFarmersByAgent.fulfilled, (state, action) => {
           state.status = 'listings-success';
           state.registeredFarmers = action.payload;
         })
         .addCase(getAllFarmersByAgent.rejected, (state, action) => {
+          state.status = 'failed';
+          state.error = action.error.message;
+        })
+        .addCase(saveOrderByAgent.pending, (state) => {
+          state.status = 'saving-order';
+        })
+        .addCase(saveOrderByAgent.fulfilled, (state, action) => {
+          state.status = 'order-saved-success';
+          state.success_msg = action.payload.message;
+        })
+        .addCase(saveOrderByAgent.rejected, (state, action) => {
+          state.status = 'failed';
+          state.error = action.error.message;
+        })
+        .addCase(getAllOrdersByAgent.pending, (state) => {
+          state.status = 'loading';
+        })
+        .addCase(getAllOrdersByAgent.fulfilled, (state, action) => {
+          state.status = 'listings-success';
+          state.farmerOrders = action.payload;
+        })
+        .addCase(getAllOrdersByAgent.rejected, (state, action) => {
+          state.status = 'failed';
+          state.error = action.error.message;
+        })
+        .addCase(saveFarmerDebit.pending, (state) => {
+          state.status = 'loading';
+        })
+        .addCase(saveFarmerDebit.fulfilled, (state, action) => {
+          state.status = 'farmer-debit-success';
+          state.success_msg = action.payload.message;
+          state.success = action.payload.success;
+        })
+        .addCase(saveFarmerDebit.rejected, (state, action) => {
           state.status = 'failed';
           state.error = action.error.message;
         });
@@ -120,5 +185,7 @@ export const getAllOrdersByAgent = createAsyncThunk('agent/orders', async ( toke
   export const getAllFarmerOrders = (state) => state.vartafrica.farmerOrders;
   export const getStatus = (state) => state.vartafrica.status;
   export const getError = (state) => state.vartafrica.error;
+  export const getSuccess = (state) => state.vartafrica.success;
+  export const getSuccessMsg = (state) => state.vartafrica.success_msg;
 
   export default varfAfricaSlice.reducer;

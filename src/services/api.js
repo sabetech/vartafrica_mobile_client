@@ -23,7 +23,7 @@ export const registerFarmer = async (newFarmer, token) => {
     try {
         const response = await fetch(`${baseUrl}registerfarmer`, {
             method: 'POST',
-            mode:'no-cors',
+            mode: 'no-cors',
             body: JSON.stringify(newFarmer),
             headers: {
                 'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export const getOrdersByAgent = async (token) => {
               }
         });
         
-        return response;
+        return response.data;
     }catch( e ){
         throw new Error(e.message());
     }
@@ -119,9 +119,44 @@ export const getListOfDeductions = async (token) => {
                 'token': token
               }
         });
-        
         return response.data;
     }catch( e ){
+        throw new Error(e.message());
+    }
+}
+
+export const saveOrderByAgentAPI = async (order, token) => {
+    try{
+        console.log(token);
+        const response = await fetch(`${baseUrl}register`, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(order),
+            headers: {
+                'Content-Type': 'application/json',
+                'token': token
+            }
+        });
+        return response.json();
+    }catch( e ) {
+        console.log(e.message());
+        throw new Error(e.message());
+    }
+}
+
+export const saveFarmerDebitAPI = async (debit, token) => {
+    try {
+        const response = await fetch (`${baseUrl}debit`, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(debit),
+            headers: {
+                'Content-Type': 'application/json',
+                'token': token
+            }
+        });
+        return response.json();
+    }catch ( e ) {
         throw new Error(e.message());
     }
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import { useDispatch, useSelector } from 'react-redux'; 
 import { AuthContext } from "../context/AuthContext"
+import { useIsFocused } from "@react-navigation/native";
 import { getAllFarmersByAgent, getAllRegisteredFarmers, getAllFarmerOrders, getAllOrdersByAgent, getStatus, setIdle } from '../redux/vartafrica';
 
 export default function Listings ({ route, navigation }) {
@@ -11,14 +12,20 @@ export default function Listings ({ route, navigation }) {
     const farmerOrders = useSelector(getAllFarmerOrders);
     const status = useSelector(getStatus);
     const { user } = useContext(AuthContext);
+    const isFocused = useIsFocused();
 
     const { title } = route.params;    
     useEffect(() => {
         navigation.setOptions({headerTitle: title, headerShown: true});
-        console.log("STATE: ", status);
-        dispatch(setIdle())
     }, []);
-    
+
+    useEffect(() => {
+        if (isFocused){
+            dispatch(setIdle());
+        }
+    },[isFocused]);
+
+    console.log("data",data);
 
     useEffect(() => {
         //find out what page this is ... 
@@ -28,20 +35,29 @@ export default function Listings ({ route, navigation }) {
                     dispatch(getAllFarmersByAgent(user.token));
                 }
                 if (status === 'listings-success') {
-                    setData(registeredFarmers);
+                    setData((prev) => [...prev, ...registeredFarmers.map(
+                                                farmer => ({
+                                                                title: farmer.name+" "+farmer.last_name,
+                                                                subTitle: farmer.contact
+                                                        }))]);
                 }
             break;
             case 'List Orders':
                 if (status === 'idle') {
                     dispatch(getAllOrdersByAgent(user.token));
                 }
+                console.log("LISTING:",status);
                 if (status === 'listings-success') {
-                    setData(farmerOrders);
+                    setData((prev) => [...farmerOrders.map(
+                                                    order => ({
+                                                            title: `${order.name} (${order.variety})`,
+                                                            subTitle: `QTY: ${order.quantity_ordered}`
+                                                            }))]);
                 }
             break;
             case 'Cards Used':
                 if (status === 'idle') {
-
+                    
                 }
                 if (status === 'listings-success') {
                     setData(farmerOrders);
@@ -60,10 +76,20 @@ export default function Listings ({ route, navigation }) {
 
     return (
         <View>
-            <FlatList 
-                data={data}
-                renderItem={({item}) => <Text style={styles.item}>{item.name} {item.last_name}</Text>}
-            />
+            {
+                data.length > 0 ? 
+                <FlatList 
+                    data={data}
+                    renderItem={
+                        ({item}) => <View style={styles.listItem}><Text style={styles.item}>{item.title}</Text><Text style={styles.itemRight}>{item.subTitle}</Text></View>
+                    }
+                />
+                :
+                <View style={styles.noDataStyle}>
+                    <Text style={styles.noDataText}>{title} has no data.</Text>
+                </View>
+            }
+            
         </View>
     )
 }
@@ -74,8 +100,27 @@ const styles = StyleSheet.create({
      paddingTop: 22
     },
     item: {
-      padding: 10,
+      marginHorizontal: 20,
       fontSize: 18,
       height: 44,
+      textAlign: 'left'
     },
+    itemRight:{
+        textAlign: 'right',
+        height: 44,
+        fontSize: 18,
+        marginHorizontal: 20
+    },
+    listItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+    noDataStyle: {
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignContent: 'center'
+    },
+    noDataText: {
+        textAlign: 'center'        
+    }
   });

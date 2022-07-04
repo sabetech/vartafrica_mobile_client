@@ -1,10 +1,11 @@
 import React, { useContext, useEffect } from "react";
 import { View, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { useIsFocused } from "@react-navigation/native";
 import DashboardCard from "../components/DashboardCard";
 import { FloatingAction } from "react-native-floating-action";
 import { AuthContext } from "../context/AuthContext";
-import { fetchDashboardValues, getAllDashboardValues, getStatus } from '../redux/vartafrica';
+import { fetchDashboardValues, getAllDashboardValues, getStatus, setIdle } from '../redux/vartafrica';
 import MainMenuItem from "../components/MainMenuButton";
 
 
@@ -14,7 +15,14 @@ export default function Dashboard ({ navigation }) {
     const status = useSelector(getStatus);
     const dispatch = useDispatch();
     const { user } = useContext(AuthContext);
-    
+    const isFocused = useIsFocused();
+
+    useEffect(() => {
+        if(isFocused){ 
+            dispatch(setIdle());
+        }
+    }, [    isFocused]);
+
     useEffect(() => {
         if (status === 'idle') {
             dispatch(fetchDashboardValues(user.token));
@@ -57,10 +65,10 @@ export default function Dashboard ({ navigation }) {
             </View>
             
             <View style={ styles.menuItems }>
-                <MainMenuItem title={"List Farmers"} navigation={navigation} />
-                <MainMenuItem title={"List Orders"} navigation={navigation} />
-                <MainMenuItem title={"Cards Used"}  navigation={navigation} />
-                <MainMenuItem title={"List of Deductions"} navigation={navigation} />
+                <MainMenuItem title={"List Farmers"} addNewLink={'RegisterFarmer'} navigation={navigation} />
+                <MainMenuItem title={"List Orders"} addNewLink={'FarmerOrders'} navigation={navigation} />
+                <MainMenuItem title={"Cards Used"} addNewLink={'CardRecharge'} navigation={navigation} />
+                <MainMenuItem title={"List of Deductions"} addNewLink={'NewFarmerDebit'} navigation={navigation} />
             </View>
             <FloatingAction
                 actions={actions}
