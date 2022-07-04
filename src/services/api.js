@@ -160,3 +160,20 @@ export const saveFarmerDebitAPI = async (debit, token) => {
         throw new Error(e.message());
     }
 }
+
+export const rechargeAPI = async (rechargeInfo, token) => {
+    try {
+        const response = await fetch (`${baseUrl}recharge`, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(rechargeInfo),
+            headers: {
+                'Content-Type': 'application/json',
+                'token': token
+            }
+        });
+        return response.json();
+    }catch ( e ) {
+        throw new Error(e.message());
+    }
+}

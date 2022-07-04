@@ -5,7 +5,9 @@ import {
   getFarmersByAgent, 
   saveOrderByAgentAPI, 
   getOrdersByAgent, 
-  saveFarmerDebitAPI } from '../services/api'
+  saveFarmerDebitAPI,
+  rechargeAPI
+} from '../services/api'
 
 export const fetchDashboardValues = createAsyncThunk('dashboard/fetchdata', async (token) => {
     try {
@@ -91,6 +93,17 @@ export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { de
   }
 });
 
+export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rechargeInfo, token} ) => {
+  
+  try{
+    const response = await rechargeAPI(rechargeInfo, token);
+    return response;
+  }catch( err ){
+    console.log(err.message);
+    return err.message;
+  }
+});
+
   export const varfAfricaSlice = createSlice({
     name: 'vart_africa_slice',
     initialState: {
@@ -165,7 +178,7 @@ export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { de
           state.error = action.error.message;
         })
         .addCase(saveFarmerDebit.pending, (state) => {
-          state.status = 'loading';
+          state.status = 'saving-debit';
         })
         .addCase(saveFarmerDebit.fulfilled, (state, action) => {
           state.status = 'farmer-debit-success';
@@ -175,7 +188,19 @@ export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { de
         .addCase(saveFarmerDebit.rejected, (state, action) => {
           state.status = 'failed';
           state.error = action.error.message;
-        });
+        })
+        .addCase(recharge.pending, (state) => {
+          state.status = 'saving-recharge';
+        })
+        .addCase(recharge.fulfilled, (state, action) => {
+          state.status = 'farmer-recharge-success';
+          state.success_msg = action.payload.message;
+          state.success = action.payload.success;
+        })
+        .addCase(recharge.rejected, (state, action) => {
+          state.status = 'failed';
+          state.error = action.error.message;
+        });;
     }
   });
 

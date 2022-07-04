@@ -46,7 +46,7 @@ export default function NewFarmerDebit({ navigation }) {
             dispatch(getAllFarmersByAgent(user.token));
         }
 
-        if (status === 'saving-order') {
+        if (status === 'saving-debit') {
             Alert.alert("Loading ...", "Saving Order ...");
         }
 
