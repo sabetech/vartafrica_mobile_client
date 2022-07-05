@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useIsFocused } from "@react-navigation/native";
 import DashboardCard from "../components/DashboardCard";
@@ -14,7 +14,7 @@ export default function Dashboard ({ navigation }) {
     const dashboardValues = useSelector(getAllDashboardValues);
     const status = useSelector(getStatus);
     const dispatch = useDispatch();
-    const { user } = useContext(AuthContext);
+    const { user, setUser } = useContext(AuthContext);
     const isFocused = useIsFocused();
 
     useEffect(() => {
@@ -28,6 +28,10 @@ export default function Dashboard ({ navigation }) {
             dispatch(fetchDashboardValues(user.token));
         } 
     }, [dispatch, status]);
+
+    const logout = () => {
+        setUser(null);
+    }
 
     const actions = [
         {
@@ -92,6 +96,14 @@ export default function Dashboard ({ navigation }) {
                     }
                 }}
             />
+            <View>
+                <TouchableOpacity
+                    style={styles.logout}
+                    onPress={() => logout()}
+                    >
+                    <Text style={styles.logoutText}>Logout</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 }
@@ -113,5 +125,17 @@ const styles = StyleSheet.create({
         alignContent: 'flex-start',
         flexWrap: 'wrap'
 
+    },
+    logout: {
+        alignSelf: 'center',
+        backgroundColor: '#A82F15',        
+        borderRadius: 10,
+        width: '80%'
+    },
+    logoutText: {
+        color: 'white',
+        textAlign: 'center',
+        fontSize: 18,
+        paddingVertical: 12
     }
 });

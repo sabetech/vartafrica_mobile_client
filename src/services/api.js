@@ -104,7 +104,7 @@ export const getUsedCardsByAgent = async (token) => {
         
         return response.data;
     }catch( e ){
-        throw new Error(e.message());
+        throw new Error(e.message);
     }
 }
 

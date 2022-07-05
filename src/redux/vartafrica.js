@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, isRejectedWithValue } from '@reduxjs/toolkit';
 import { 
   getDashboardValues, 
   registerFarmer, 
@@ -106,25 +106,30 @@ export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { de
   }
 });
 
-export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rechargeInfo, token} ) => {
+export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rechargeInfo, token}, { rejectWithValue } ) => {
   
   try{
     const response = await rechargeAPI(rechargeInfo, token);
     return response;
   }catch( err ){
     console.log(err.message);
-    return err.message;
+    return rejectWithValue(err.message);
   }
 });
 
-export const cardsUsed = createAsyncThunk('agent/farmer/cardsused', async ( { rechargeInfo, token} ) => {
+export const cardsUsed = createAsyncThunk('agent/farmer/cardsused', async ( token, { rejectWithValue } ) => {
   
   try{
     const response = await getUsedCardsByAgent( token );
-    return response;
+    
+    if (response.success) {
+      const { data } = response;
+      return data
+    }
+    
   }catch( err ){
-    console.log(err.message);
-    return err.message;
+    
+    return rejectWithValue(err.message);
   }
 });
 

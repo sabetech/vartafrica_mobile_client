@@ -65,14 +65,17 @@ export default function Listings ({ route, navigation }) {
                 }
             break;
             case 'Cards Used':
+                console.log("Status: ", status);
                 if (status === 'idle') {
                     dispatch(cardsUsed(user.token));
                 }
                 if (status === 'listings-success') {
+                    console.log(cardsUsedList);
                     setData((prev) => [...prev, ...cardsUsedList.map(
                         cardsUsedListItem => (
                             {
-                                
+                                title: cardsUsedListItem.used_by,
+                                subTitle: cardsUsedListItem.amount
                             }
                         )
                     )]);
@@ -82,7 +85,7 @@ export default function Listings ({ route, navigation }) {
                 if (status === 'idle') {
                     dispatch(deductionlist(user.token));
                 }
-                console.log(deductions);
+                
                 if (status === 'listings-success') {
                     setData((prev) => [...prev, ...deductions.map(
                         deduction => ({
