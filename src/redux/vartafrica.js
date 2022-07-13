@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, isRejectedWithValue } from '@reduxjs/toolkit';
+import { storageKeys } from '../constants';
 import { 
   getDashboardValues, 
   registerFarmer, 
@@ -10,27 +11,98 @@ import {
   getListOfDeductions,
   getUsedCardsByAgent
 } from '../services/api'
+import Storage from '../services/storage';
 
-export const fetchDashboardValues = createAsyncThunk('dashboard/fetchdata', async (token) => {
-    try {
-      const response = await getDashboardValues(token);
-      console.log("dashboard values:" , response.data)
-      if (response.success) {
-        const { data } = response;
-        
-        return data;
-      }
-      
-    } catch (err) {
-        console.log(err.message()); //fetch from async storage then 
-      return err.message();
-    }
+export const downloadAppDataToStorage = createAsyncThunk('app/fetchAllRemoteData', async (token, { rejectWithValue} ) => {
+  //fetch all fetchables ... //this is called after login ..
+  try{
+    await fetchDashboardValuesFromServer(token);
+    await fetchFarmersFromServer(token);
+    await fetchOrdersFromServer(token);
+    await fetchCardsUsedFromServer(token);
+    await fetchDeductionListFromServer(token);
+  } catch (err){
+
+    return rejectWithValue(err.message());
+
+  }
 });
+
+const fetchDashboardValuesFromServer = async (token) => {
+  try{
+    const response = await getDashboardValues(token);
+    if (response.success) {
+      const { data } = response;
+      Storage.saveData(storageKeys.DASHBOARD_VALUES, data);
+    }    
+  }catch (err) {
+    return rejectWithValue(err.message());
+  }
+}
+
+const fetchFarmersFromServer = async (token) => {
+  try{
+    const response = await getFarmersByAgent(token);
+    if (response.success) {
+      const { data } = response;
+      Storage.saveData(storageKeys.FARMERS, data);
+    }    
+  }catch (err) {
+    return rejectWithValue(err.message());
+  }
+}
+
+const fetchOrdersFromServer = async (token) => {
+  try {
+    const response = await getOrdersByAgent(token);
+    if (response.success) {
+      const { data } = response;
+      Storage.saveData(storageKeys.ORDERS, data);
+    }
+  } catch ( err ) {
+    return err.message;
+  }
+}
+
+const fetchCardsUsedFromServer = async (token) => {
+  try {
+    const response = await getUsedCardsByAgent(token);
+    if (response.success) {
+      const { data } = response;
+      Storage.saveData(storageKeys.CARDS_USED, data);
+    }
+  } catch ( err ) {
+    return err.message;
+  }
+}
+
+const fetchDeductionListFromServer = async (token) => {
+  try {
+    const response = await getListOfDeductions(token);
+    if (response.success) {
+      const { data } = response;
+      Storage.saveData(storageKeys.CARDS_USED, data);
+    }
+  } catch ( err ) {
+    throw new Error( err.message );
+  }
+}
 
 export const registerFarmerThunk = createAsyncThunk('farmer/register', async ({ newFarmer, token }) => {
   try {
-    const response = await registerFarmer(newFarmer, token);
-    
+    const requestInfo = {
+      url: 'registerfarmer',
+      method: 'POST',
+      body: JSON.stringify(newFarmer),
+      headers: {
+        'Content-Type': 'application/json',
+        'token': token
+      },
+      message: 'Farmer has been registered Successfully!',
+      synced: false
+    }
+    const response = await Storage.saveData( storageKeys.FARMERS, { newFarmer, token, requestInfo } );
+
     if (response.success){
       const { message } = response;
       return message;

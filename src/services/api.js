@@ -1,4 +1,7 @@
 import axios from "axios";
+import Storage from "./storage";
+import { storageKeys } from "../constants";
+
 const baseUrl = 'http://vartafrica.com/api/';
 export const login = async ({username, password}) => {
     try{
@@ -47,7 +50,10 @@ export const getFarmersByAgent = async (token) => {
                 'Content-Type': 'application/json',
                 'token': token
             }
-        })
+        });
+
+        await Storage.getData('@farmer', {newFarmer, token});
+
         return response;
     } catch ( e ) {
         throw new Error(e.message());
@@ -55,6 +61,7 @@ export const getFarmersByAgent = async (token) => {
 }
 
 export const getDashboardValues = async (token) => {
+    await Storage.get('@dashboard-values');
     try {
         const response = await axios({
             url: `${baseUrl}dashboard`,

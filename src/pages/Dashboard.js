@@ -5,8 +5,9 @@ import { useIsFocused } from "@react-navigation/native";
 import DashboardCard from "../components/DashboardCard";
 import { FloatingAction } from "react-native-floating-action";
 import { AuthContext } from "../context/AuthContext";
-import { fetchDashboardValues, getAllDashboardValues, getStatus, setIdle } from '../redux/vartafrica';
+import { downloadAppDataToStorage, fetchDashboardValues, getAllDashboardValues, getStatus, setIdle, varfAfricaSlice } from '../redux/vartafrica';
 import MainMenuItem from "../components/MainMenuButton";
+import Storage from "../services/storage";
 
 
 
@@ -17,6 +18,8 @@ export default function Dashboard ({ navigation }) {
     const { user, setUser } = useContext(AuthContext);
     const isFocused = useIsFocused();
 
+    console.log(varfAfricaSlice);
+
     useEffect(() => {
         if(isFocused){ 
             dispatch(setIdle());
@@ -25,11 +28,13 @@ export default function Dashboard ({ navigation }) {
 
     useEffect(() => {
         if (status === 'idle') {
-            dispatch(fetchDashboardValues(user.token));
+            // dispatch(fetchDashboardValues(user.token));
+            dispatch(downloadAppDataToStorage(user.token));
         } 
     }, [dispatch, status]);
 
     const logout = () => {
+        Storage.removeUser();
         setUser(null);
     }
 
@@ -61,6 +66,15 @@ export default function Dashboard ({ navigation }) {
       ]
     return( 
         <View style={{padding: 10, flex: 1}}>
+            <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
+                <TouchableOpacity
+                    style={ styles.sync }
+                >
+                    <Text style={ styles.syncText }>Sync</Text>
+                </TouchableOpacity>
+                <Text style={ styles.statusStyle }>Status of Sync</Text>
+            </View>
+
             <View style={styles.dashboardlist}>
                 <DashboardCard title={"Number of Registered Farmers"} value={dashboardValues?.farmer_count || 0 } />
                 <DashboardCard title={"Quantity of Orders"} value={dashboardValues?.total_orders || 0 } />
@@ -130,12 +144,30 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         backgroundColor: '#A82F15',        
         borderRadius: 10,
-        width: '80%'
+        width: '80%',
+        zIndex: -1
     },
     logoutText: {
         color: 'white',
         textAlign: 'center',
         fontSize: 18,
         paddingVertical: 12
+    },
+    sync: {
+        width: '30%',
+        height: 30,
+        backgroundColor: 'green',
+        borderRadius: 10,
+        marginRight: 10        
+    },
+    syncText: {
+        color: 'white',
+        padding: 5,
+        textAlign: 'center',
+        
+    },
+    statusStyle: {
+        textAlign: 'center'
     }
+
 });
