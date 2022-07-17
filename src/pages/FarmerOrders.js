@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
 import {Picker} from '@react-native-picker/picker';
 import { useDispatch, useSelector } from 'react-redux'; 
@@ -13,17 +13,16 @@ import { getAllFarmersByAgent,
 
 export default function FarmerOrders ({ navigation }) {
     const [selectedFarmer, setSelectedFarmer] = useState();
-    const [seed_quantity, setSeedQty] = useState(["3"]);
+    const [seed_quantity, setSeedQty] = useState(["0"]);
     const [crop_cultivated, setCropCultivated] = useState("Blesi");
     const [variety, setVariety] = useState(["var_1"]);
-    const [unit_price, setUnitPrice] = useState(["3.2"]);
-    const [total_price, setTotalPrice] = useState(["4.2"]);
-    const [dis_val_per_unit, setDisValPerUnit] = useState("1.4");
-    const [save_amount, setSaveAmt] = useState(0);
+    const [unit_price, setUnitPrice] = useState(["0"]);
+    const [total_price, setTotalPrice] = useState(["0"]);
+    const [dis_val_per_unit, setDisValPerUnit] = useState("0");
     const [net_order_value, setnetOrderValue] = useState(0);
     const [total_net_saving_goal, setTotalNetSavingGoal] = useState();
-    const [target_saving_amount, setTargetSavingAmount] = useState();
     const [varietyViewControls, setVarietyView] = useState([]);
+    const [elRefs, setElRefs] = useState([]);
     
     const dispatch = useDispatch();
     const status = useSelector(getStatus);
@@ -35,6 +34,40 @@ export default function FarmerOrders ({ navigation }) {
         setVarietyView((prev) => [...prev, varietyControl(prev.length)]);
 
     }, []);
+
+    useEffect(() => {
+        // add or remove refs
+        setElRefs((elRefs) =>
+          Array(varietyViewControls)
+            .fill()
+            .map((_, i) => elRefs[i] || React.createRef()),
+        );
+      }, [varietyViewControls]);
+
+    useEffect(() => {
+        if ((unit_price.length == 0) || (seed_quantity.length == 0)) return;
+
+        if (unit_price.some(el => isNaN(el) ) || seed_quantity.some(el => isNaN(el))) return;
+        
+        for(let i = 0;(i < seed_quantity.length || i < unit_price.length);i++){
+            console.log("seedquty",parseInt(seed_quantity[i]));
+            console.log("unitprice", parseFloat(unit_price[i]));
+
+            handleTotalPriceChanged(parseInt(seed_quantity[i]) * parseFloat(unit_price[i]), i);
+        }
+
+    },[seed_quantity, unit_price, dis_val_per_unit]);
+
+    useEffect(() => {
+        console.log("Total price", total_price);
+        console.log("net saving ", total_price.reduce((prev, curr) => prev + curr, 0));
+        if (total_price.length == 0) return;
+        if (isNaN(dis_val_per_unit)) return;
+        if (total_price.some(el => isNaN(el))) return;
+
+        setnetOrderValue((total_price.reduce((prev, curr) => prev + curr, 0) - parseFloat(dis_val_per_unit)).toString());
+
+    }, [total_price])
     
     //load farmers from remote api ... or from localstore
     useEffect(() => {
@@ -68,10 +101,7 @@ export default function FarmerOrders ({ navigation }) {
             unit_price,
             total_price,
             dis_val_per_unit,
-            save_amount,
             net_order_value,
-            total_net_saving_goal,
-            target_saving_amount,
         }
 
         const thunkArgs = {
@@ -108,8 +138,11 @@ export default function FarmerOrders ({ navigation }) {
                         style={styles.input} 
                         inputStyle={styles.inputStyle}
                         labelStyle={styles.labelStyle}
-                        onChangeText={(text) => handleTotalPriceChanged(text, key)} value={ total_price[key] } />
+                        value={ "total_price[key]" }
+                        editable={false}
+                        />
                 </View>
+                
         );
     }
 
@@ -127,6 +160,7 @@ export default function FarmerOrders ({ navigation }) {
 
     const handleTotalPriceChanged = (text, index) => {
         setTotalPrice((prev) => [...prev.slice(0, index), parseFloat(text), ...prev.slice(index + 1)]);
+        
     }
 
     const removeVarietyControls = () => {
@@ -171,6 +205,12 @@ export default function FarmerOrders ({ navigation }) {
                             )
                         }
                 </Picker>
+                <TextInput label="Crop Cultivated" 
+                    style={styles.input} 
+                    inputStyle={styles.inputStyle}
+                    labelStyle={styles.labelStyle}
+                    onChangeText={setCropCultivated} value={crop_cultivated} />
+                
                 {
                     varietyViewControls && varietyViewControls.map(formControl => formControl)
                 }
@@ -191,19 +231,7 @@ export default function FarmerOrders ({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
-                <TextInput label="Crop Cultivated" 
-                    style={styles.input} 
-                    inputStyle={styles.inputStyle}
-                    labelStyle={styles.labelStyle}
-                    onChangeText={setCropCultivated} value={crop_cultivated} />
-
-                <TextInput label="Save Amount" 
-                    style={styles.input} 
-                    inputStyle={styles.inputStyle}
-                    labelStyle={styles.labelStyle}
-                    onChangeText={setSaveAmt} value={save_amount} />
-
-                <TextInput label="Discounted Value per Unit (UGX)" 
+                <TextInput label="Discounted Value(UGX)" 
                     style={styles.input} 
                     inputStyle={styles.inputStyle}
                     labelStyle={styles.labelStyle}
@@ -213,19 +241,9 @@ export default function FarmerOrders ({ navigation }) {
                     style={styles.input} 
                     inputStyle={styles.inputStyle}
                     labelStyle={styles.labelStyle}
-                    onChangeText={setnetOrderValue} value={net_order_value} />
-
-                <TextInput label="Total Savings Goal (UGX)" 
-                    style={styles.input} 
-                    inputStyle={styles.inputStyle}
-                    labelStyle={styles.labelStyle}
-                    onChangeText={setTotalNetSavingGoal} value={total_net_saving_goal} />
-
-                <TextInput label="Target Savings Amount (UGX)" 
-                    style={styles.input} 
-                    inputStyle={styles.inputStyle}
-                    labelStyle={styles.labelStyle}
-                    onChangeText={setTargetSavingAmount} value={target_saving_amount} />
+                    value={net_order_value} 
+                    editable={false}
+                    />
 
                 <View style={styles.submitButtonView}>
                     <TouchableOpacity style={styles.submitButton} onPress={() => saveFarmerOrder()}>

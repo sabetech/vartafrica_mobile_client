@@ -130,7 +130,8 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         backgroundColor: '#A82F15',        
         borderRadius: 10,
-        width: '80%'
+        width: '80%',
+        zIndex: -1
     },
     logoutText: {
         color: 'white',
