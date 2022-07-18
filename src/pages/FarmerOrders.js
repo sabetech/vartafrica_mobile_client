@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext, useRef } from "react";
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, TextInput as Ti} from "react-native";
 import {Picker} from '@react-native-picker/picker';
 import { useDispatch, useSelector } from 'react-redux'; 
 import { TextInput } from "react-native-element-textinput";
@@ -20,7 +20,6 @@ export default function FarmerOrders ({ navigation }) {
     const [total_price, setTotalPrice] = useState(["0"]);
     const [dis_val_per_unit, setDisValPerUnit] = useState("0");
     const [net_order_value, setnetOrderValue] = useState(0);
-    const [total_net_saving_goal, setTotalNetSavingGoal] = useState();
     const [varietyViewControls, setVarietyView] = useState([]);
     const [elRefs, setElRefs] = useState([]);
     
@@ -28,44 +27,37 @@ export default function FarmerOrders ({ navigation }) {
     const status = useSelector(getStatus);
     const registeredFarmers = useSelector(getAllRegisteredFarmers);
     const { user } = useContext(AuthContext);
+
+    const inputRefs = useRef([]);
     
     useEffect(() => {
         dispatch(setIdle());
         setVarietyView((prev) => [...prev, varietyControl(prev.length)]);
-
     }, []);
 
     useEffect(() => {
-        // add or remove refs
-        setElRefs((elRefs) =>
-          Array(varietyViewControls)
-            .fill()
-            .map((_, i) => elRefs[i] || React.createRef()),
-        );
-      }, [varietyViewControls]);
-
-    useEffect(() => {
         if ((unit_price.length == 0) || (seed_quantity.length == 0)) return;
-
         if (unit_price.some(el => isNaN(el) ) || seed_quantity.some(el => isNaN(el))) return;
         
         for(let i = 0;(i < seed_quantity.length || i < unit_price.length);i++){
-            console.log("seedquty",parseInt(seed_quantity[i]));
-            console.log("unitprice", parseFloat(unit_price[i]));
-
             handleTotalPriceChanged(parseInt(seed_quantity[i]) * parseFloat(unit_price[i]), i);
         }
 
     },[seed_quantity, unit_price, dis_val_per_unit]);
 
-    useEffect(() => {
-        console.log("Total price", total_price);
-        console.log("net saving ", total_price.reduce((prev, curr) => prev + curr, 0));
+    useEffect(() => {        
         if (total_price.length == 0) return;
         if (isNaN(dis_val_per_unit)) return;
         if (total_price.some(el => isNaN(el))) return;
 
         setnetOrderValue((total_price.reduce((prev, curr) => prev + curr, 0) - parseFloat(dis_val_per_unit)).toString());
+
+        if (inputRefs)
+            total_price.map((total,i) => {
+                if (typeof inputRefs.current[i] === 'undefined') return;
+                    
+                inputRefs.current[i].setNativeProps({text: total.toString()});
+            });
 
     }, [total_price])
     
@@ -134,12 +126,13 @@ export default function FarmerOrders ({ navigation }) {
                         labelStyle={styles.labelStyle}
                         onChangeText={(text) => handleUnitPriceChanged(text, key)} value={ unit_price[key] } />
 
-                    <TextInput label="Total Price (UGX)" 
-                        style={styles.input} 
-                        inputStyle={styles.inputStyle}
-                        labelStyle={styles.labelStyle}
-                        value={ "total_price[key]" }
-                        editable={false}
+                    {/* ////// USING REACT NATIVE TextInput HERE DIFFERENT FROM TextInput FROM A LIBRARY /////// */}
+                    <Text>Total Price (UGX)</Text>
+                    <Ti 
+                        style={ styles.input } 
+                        value={ total_price[key] }
+                        editable={ false }
+                        ref={el => inputRefs.current[key] = el}
                         />
                 </View>
                 
@@ -210,7 +203,6 @@ export default function FarmerOrders ({ navigation }) {
                     inputStyle={styles.inputStyle}
                     labelStyle={styles.labelStyle}
                     onChangeText={setCropCultivated} value={crop_cultivated} />
-                
                 {
                     varietyViewControls && varietyViewControls.map(formControl => formControl)
                 }
