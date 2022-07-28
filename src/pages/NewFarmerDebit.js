@@ -38,10 +38,6 @@ export default function NewFarmerDebit({ navigation }) {
             dispatch(getAllFarmersByAgent(user.token));
         }
 
-        if (status === 'saving-debit') {
-            Alert.alert("Loading ...", "Saving Order ...");
-        }
-
         if (status === 'farmer-debit-success'){
             if (success) {
                 Alert.alert('Success', responseMsg);
@@ -59,8 +55,13 @@ export default function NewFarmerDebit({ navigation }) {
             amount
         }
         
+        const chosenFarmer = registeredFarmers.find(farmerFind => farmerFind === user_id);
         const farmerDebitThunkArgs = {
             debit,
+            debit_ui_info:{
+                name: chosenFarmer.name,
+                amount: amount
+            },
             token: user.token
         }
         dispatch(saveFarmerDebit(farmerDebitThunkArgs));

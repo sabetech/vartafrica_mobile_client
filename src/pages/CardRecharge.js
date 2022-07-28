@@ -66,9 +66,14 @@ export default function CardRecharge({ navigation }) {
             farmers: farmer.id,
             serial_number
         }
+
+        const recharge_ui_info = {
+            used_by: farmer.name
+        }
         
         const farmerRechargeThunkArgs = {
             rechargeInfo,
+            recharge_ui_info,
             token: user.token
         }
         dispatch(recharge(farmerRechargeThunkArgs));

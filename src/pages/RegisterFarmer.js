@@ -54,9 +54,6 @@ export default function RegisterFarmer({ navigation }) {
         console.log(status)
         if (status == appStates.FARMER_SAVED){
             Alert.alert("Success", "Farmer Registered Successfully");
-        }
-        console.log(status);
-        if (status == appStates.APP_READY) {
             navigation.goBack();
         }
         
@@ -234,10 +231,17 @@ export default function RegisterFarmer({ navigation }) {
             labelStyle={styles.labelStyle}
             onChangeText={(text) => setLandarea(text)} value={land_area} placeholder="132" label="Land Area" />
 
-        <TextInput style={styles.input} 
-            inputStyle={styles.inputStyle}
-            labelStyle={styles.labelStyle}
-            onChangeText={(text) => setFertilizer(text)} value={fertilizer} placeholder="Fertilizer" label="Fertilizer" />
+        <Text>Fertilizer</Text>
+        <Picker
+            prompt={"Fertilizer"}
+            selectedValue={fertilizer}
+            onValueChange={(itemValue, itemIndex) =>
+                setFertilizer(itemValue)
+            }
+        >
+            <Picker.Item label="Yes" value="yes" />
+            <Picker.Item label="No" value="no" />
+        </Picker>
 
         <Text>Disabled?</Text>
         <Picker

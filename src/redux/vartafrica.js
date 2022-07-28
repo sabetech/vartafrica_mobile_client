@@ -1,13 +1,10 @@
 import { createSlice, createAsyncThunk, isRejectedWithValue } from '@reduxjs/toolkit';
+import { act } from 'react-test-renderer';
 import { appStates, storageKeys } from '../constants';
 import { 
   getDashboardValues, 
-  registerFarmer, 
   getFarmersByAgent, 
-  saveOrderByAgentAPI, 
   getOrdersByAgent, 
-  saveFarmerDebitAPI,
-  rechargeAPI,
   getListOfDeductions,
   getUsedCardsByAgent,
   getListOfvariety,
@@ -270,51 +267,70 @@ export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {o
 //   }
 // });
 
-export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { debit, token} ) => {
-  
-  try{
-    const response = await saveFarmerDebitAPI(debit, token);
-    return response;
-  }catch( err ){
-    console.log(err.message);
+export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { debit, debit_ui_info, token} ) => {
+  try {
+    const requestInfo = {
+      url: 'debit',
+      method: 'POST',
+      body: JSON.stringify(debit),
+      headers: {
+        'Content-Type': 'application/json',
+        'token': token
+      },
+      message: 'Debit has been saved successfully',
+      synced: false
+    }
+
+    const response = await Storage.saveData( storageKeys.DEBITS, { debit, token, requestInfo } );
+    
+    if (response.success) {
+      const { message } = response;
+      return {
+        message, 
+        debit: {
+          id: uuidv4(),
+          username: debit_ui_info.name,
+          amount: debit_ui_info.amount,
+          synced: false
+        }
+      };
+    }
+
+  }catch ( err ) {
     return err.message;
   }
 });
 
-export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rechargeInfo, token}, { rejectWithValue } ) => {
-  
-  try{
-    const response = await rechargeAPI(rechargeInfo, token);
-    return response;
-  }catch( err ){
-    console.log(err.message);
-    return rejectWithValue(err.message);
-  }
-});
+export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rechargeInfo, recharge_ui_info, token}, { rejectWithValue } ) => {
+  try {
+    const requestInfo = {
+      url: 'recharge',
+      method: 'POST',
+      body: JSON.stringify(rechargeInfo),
+      headers: {
+        'Content-Type': 'application/json',
+        'token': token
+      },
+      message: 'Recharge has been saved successfully',
+      synced: false
+    }
 
-export const cardsUsed = createAsyncThunk('agent/farmer/cardsused', async ( token, { rejectWithValue } ) => {
-  
-  try{
-    const response = await getUsedCardsByAgent( token );
+    const response = await Storage.saveData( storageKeys.RECHARGE, { rechargeInfo, token, requestInfo } );
     
     if (response.success) {
-      const { data } = response;
-      return data
+      const { message } = response;
+      return {
+        message, 
+        recharge: {
+          id: uuidv4(),
+          serial: rechargeInfo.serial_number,
+          used_by: recharge_ui_info.used_by,
+          synced: false
+        }
+      };
     }
-    
-  }catch( err ){
-    
-    return rejectWithValue(err.message);
-  }
-});
 
-export const deductionlist = createAsyncThunk('agent/debit/list', async ( token ) => {
-  
-  try{
-    const response = await getListOfDeductions(token);
-    return response.data;
-  }catch( err ){
-    console.log(err.message);
+  }catch ( err ) {
     return err.message;
   }
 });
@@ -359,17 +375,6 @@ export const deductionlist = createAsyncThunk('agent/debit/list', async ( token 
         .addCase(downloadAppDataToStorage.rejected, (state) => {
           state.status = appStates.FAILED
         })
-        // .addCase(fetchDashboardValues.pending, (state) => {
-        //     state.status = 'loading';
-        //   })
-        // .addCase(fetchDashboardValues.fulfilled, (state, action) => {
-        //     state.status = 'dashboard-values-succeeded';
-        //     state.dashboard_values = action.payload;
-        // })
-        // .addCase(fetchDashboardValues.rejected, (state, action) => {
-        //     state.status = 'failed';
-        //     state.error = action.error.message;
-        // })
         .addCase(registerFarmerThunk.pending, (state) => {
           state.status = appStates.LOADING;
         })
@@ -385,24 +390,16 @@ export const deductionlist = createAsyncThunk('agent/debit/list', async ( token 
           state.status = 'failed';
           state.error = action.error.message;
         })
-        // .addCase(getAllFarmersByAgent.pending, (state) => {
-        //   state.status = 'loading';
-        // })
-        // .addCase(getAllFarmersByAgent.fulfilled, (state, action) => {
-        //   state.status = 'listings-success';
-        //   state.registeredFarmers = action.payload;
-        // })
-        // .addCase(getAllFarmersByAgent.rejected, (state, action) => {
-        //   state.status = 'failed';
-        //   state.error = action.error.message;
-        // })
         .addCase(saveOrderByAgent.pending, (state) => {
           state.status = 'saving-order';
         })
         .addCase(saveOrderByAgent.fulfilled, (state, action) => {
-          state.status = 'order-saved-success';
+          
           state.success_msg = action.payload.message;
-          state.farmerOrders = [...state.farmerOrders, action.payload.order]
+          state.farmerOrders = [...state.farmerOrders, action.payload.order];
+          state.dashboard_values.total_orders = state.farmerOrders.length;
+
+          state.status = appStates.ORDER_SAVED;
         })
         .addCase(saveOrderByAgent.rejected, (state, action) => {
           state.status = 'failed';
@@ -423,9 +420,13 @@ export const deductionlist = createAsyncThunk('agent/debit/list', async ( token 
           state.status = 'saving-debit';
         })
         .addCase(saveFarmerDebit.fulfilled, (state, action) => {
-          state.status = 'farmer-debit-success';
+          
           state.success_msg = action.payload.message;
           state.success = action.payload.success;
+          state.deductions = [...state.deductions, action.payload.debit];
+
+          // verify: state.dashboard_values.
+          state.status = appStates.DEBIT_SAVED;
         })
         .addCase(saveFarmerDebit.rejected, (state, action) => {
           state.status = 'failed';
@@ -435,36 +436,40 @@ export const deductionlist = createAsyncThunk('agent/debit/list', async ( token 
           state.status = 'saving-recharge';
         })
         .addCase(recharge.fulfilled, (state, action) => {
-          state.status = 'farmer-recharge-success';
+          
           state.success_msg = action.payload.message;
           state.success = action.payload.success;
+          state.cardsUsed = [...state.cardsUsed, action.payload.recharge];
+
+          state.status = appStates.RECHARGE_SAVED;
+
         })
         .addCase(recharge.rejected, (state, action) => {
           state.status = 'failed';
           state.error = action.error.message;
         })
-        .addCase(cardsUsed.pending, (state) => {
-          state.status = 'loading';
-        })
-        .addCase(cardsUsed.fulfilled, (state, action) => {
-          state.status = 'listings-success';
-          state.cardsUsed = action.payload;
-        })
-        .addCase(cardsUsed.rejected, (state, action) => {
-          state.status = 'failed';
-          state.error = action.error.message;
-        })
-        .addCase(deductionlist.pending, (state) => {
-          state.status = 'loading';
-        })
-        .addCase(deductionlist.fulfilled, (state, action) => {
-          state.status = 'listings-success';
-          state.deductions = action.payload;
-        })
-        .addCase(deductionlist.rejected, (state, action) => {
-          state.status = 'failed';
-          state.error = action.error.message;
-        });
+        // .addCase(cardsUsed.pending, (state) => {
+        //   state.status = 'loading';
+        // })
+        // .addCase(cardsUsed.fulfilled, (state, action) => {
+        //   state.status = 'listings-success';
+        //   state.cardsUsed = action.payload;
+        // })
+        // .addCase(cardsUsed.rejected, (state, action) => {
+        //   state.status = 'failed';
+        //   state.error = action.error.message;
+        // })
+        // .addCase(deductionlist.pending, (state) => {
+        //   state.status = 'loading';
+        // })
+        // .addCase(deductionlist.fulfilled, (state, action) => {
+        //   state.status = 'listings-success';
+        //   state.deductions = action.payload;
+        // })
+        // .addCase(deductionlist.rejected, (state, action) => {
+        //   state.status = 'failed';
+        //   state.error = action.error.message;
+        // });
     }
   });
 
