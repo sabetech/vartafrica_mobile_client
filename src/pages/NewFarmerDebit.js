@@ -26,14 +26,6 @@ export default function NewFarmerDebit({ navigation }) {
     const { user } = useContext(AuthContext);
     
     dispatch = useDispatch();
-    const isFocused = useIsFocused();
-
-    useEffect(() => {
-
-        if (isFocused)
-            dispatch(setIdle());
-
-    }, [isFocused]);
 
     useEffect(() => {
 

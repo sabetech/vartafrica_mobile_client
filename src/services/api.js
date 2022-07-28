@@ -1,6 +1,4 @@
 import axios from "axios";
-import Storage from "./storage";
-import { storageKeys } from "../constants";
 
 const baseUrl = 'http://vartafrica.com/api/';
 export const login = async ({username, password}) => {
@@ -52,16 +50,13 @@ export const getFarmersByAgent = async (token) => {
             }
         });
 
-        await Storage.getData('@farmer', {newFarmer, token});
-
-        return response;
+        return response.data;
     } catch ( e ) {
         throw new Error(e.message());
     }
 }
 
 export const getDashboardValues = async (token) => {
-    await Storage.get('@dashboard-values');
     try {
         const response = await axios({
             url: `${baseUrl}dashboard`,
@@ -182,5 +177,46 @@ export const rechargeAPI = async (rechargeInfo, token) => {
         return response.json();
     }catch ( e ) {
         throw new Error(e.message());
+    }
+}
+
+export const getListOfCrops = async (token) => {
+    try {
+        
+        const response = await axios({
+            url: `${baseUrl}crop`,
+            method: 'GET',
+            mode:'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': token
+              }
+        });
+        
+        return response.data;
+
+
+    } catch ( err ) {
+        throw new Error(err.message());
+    }
+}
+
+export const getListOfvariety = async (token) => {
+    try {
+        
+        const response = await axios({
+            url: `${baseUrl}variety`,
+            method: 'GET',
+            mode:'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': token
+              }
+        });
+        return response.data;
+
+
+    } catch ( err ) {
+        throw new Error(err.message());
     }
 }

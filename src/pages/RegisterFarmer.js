@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { registerFarmerThunk, getStatus, setIdle } from '../redux/vartafrica';
 import { Picker } from '@react-native-picker/picker';
 import { PermissionsAndroid } from 'react-native';
+import { appStates } from "../constants";
 
 
 export default function RegisterFarmer({ navigation }) {
@@ -51,17 +52,12 @@ export default function RegisterFarmer({ navigation }) {
 
     useEffect(() => {
         console.log(status)
-        if (status == 'register-farmer-success'){
+        if (status == appStates.FARMER_SAVED){
             Alert.alert("Success", "Farmer Registered Successfully");
-            dispatch(setIdle());        
         }
         console.log(status);
-        if (status == 'idle') {
+        if (status == appStates.APP_READY) {
             navigation.goBack();
-        }
-
-        if (status == 'loading'){
-            Alert.alert("Loading ...", "Saving Farmer ...");
         }
         
         return (() => {

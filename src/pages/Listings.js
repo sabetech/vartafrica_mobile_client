@@ -1,21 +1,17 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
-import { useDispatch, useSelector } from 'react-redux'; 
+import { useSelector } from 'react-redux'; 
 import { AuthContext } from "../context/AuthContext"
 import { useIsFocused } from "@react-navigation/native";
-import { getAllFarmersByAgent, 
-        getAllRegisteredFarmers, 
+import { getAllRegisteredFarmers, 
         getAllFarmerOrders, 
-        getAllOrdersByAgent, 
-        deductionlist,
         getAllDeductions,
         getAllCardsUsed,
-        cardsUsed,
-        getStatus, setIdle } from '../redux/vartafrica';
+        getStatus } from '../redux/vartafrica';
+import { appStates } from "../constants";
 
 export default function Listings ({ route, navigation }) {
     const [ data, setData ] = useState([]);
-    const dispatch = useDispatch();
     const registeredFarmers = useSelector(getAllRegisteredFarmers);
     const farmerOrders = useSelector(getAllFarmerOrders);
     const deductions = useSelector(getAllDeductions);
@@ -30,9 +26,9 @@ export default function Listings ({ route, navigation }) {
     }, []);
 
     useEffect(() => {
-        if (isFocused){
-            dispatch(setIdle());
-        }
+        // if (isFocused){
+        //     dispatch(setIdle());
+        // }
     },[isFocused]);
 
     console.log("data",data);
@@ -41,10 +37,7 @@ export default function Listings ({ route, navigation }) {
         //find out what page this is ... 
         switch(title) {
             case 'List Farmers':
-                if (status === 'idle') {
-                    dispatch(getAllFarmersByAgent(user.token));
-                }
-                if (status === 'listings-success') {
+                if (status === appStates.APP_READY) {
                     setData((prev) => [...prev, ...registeredFarmers.map(
                                                 farmer => ({
                                                                 title: farmer.name+" "+farmer.last_name,
@@ -53,10 +46,8 @@ export default function Listings ({ route, navigation }) {
                 }
             break;
             case 'List Orders':
-                if (status === 'idle') {
-                    dispatch(getAllOrdersByAgent(user.token));
-                }
-                if (status === 'listings-success') {
+                
+                if (status === appStates.APP_READY) {
                     setData((prev) => [...prev, ...farmerOrders.map(
                                                     order => ({
                                                             title: `${order.name} (${order.variety})`,
@@ -65,12 +56,8 @@ export default function Listings ({ route, navigation }) {
                 }
             break;
             case 'Cards Used':
-                console.log("Status: ", status);
-                if (status === 'idle') {
-                    dispatch(cardsUsed(user.token));
-                }
-                if (status === 'listings-success') {
-                    console.log(cardsUsedList);
+                
+                if (status === appStates.APP_READY) {
                     setData((prev) => [...prev, ...cardsUsedList.map(
                         cardsUsedListItem => (
                             {
@@ -82,11 +69,8 @@ export default function Listings ({ route, navigation }) {
                 }
             break;
             case 'List of Deductions':
-                if (status === 'idle') {
-                    dispatch(deductionlist(user.token));
-                }
-                
-                if (status === 'listings-success') {
+            
+                if (status === appStates.APP_READY) {
                     setData((prev) => [...prev, ...deductions.map(
                         deduction => ({
                             title: deduction.username,
@@ -96,10 +80,7 @@ export default function Listings ({ route, navigation }) {
                 }
             break;
         }
-
-        
-
-    },[dispatch, status]);
+    },[status]);
 
     return (
         <View>

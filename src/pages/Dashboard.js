@@ -5,9 +5,10 @@ import { useIsFocused } from "@react-navigation/native";
 import DashboardCard from "../components/DashboardCard";
 import { FloatingAction } from "react-native-floating-action";
 import { AuthContext } from "../context/AuthContext";
-import { downloadAppDataToStorage, fetchDashboardValues, getAllDashboardValues, getStatus, setIdle, varfAfricaSlice } from '../redux/vartafrica';
+import { downloadAppDataToStorage, getAllDashboardValues, getStatus, setIdle, varfAfricaSlice } from '../redux/vartafrica';
 import MainMenuItem from "../components/MainMenuButton";
 import Storage from "../services/storage";
+import { appStates } from "../constants";
 
 
 
@@ -18,17 +19,14 @@ export default function Dashboard ({ navigation }) {
     const { user, setUser } = useContext(AuthContext);
     const isFocused = useIsFocused();
 
-    console.log(varfAfricaSlice);
-
     useEffect(() => {
         if(isFocused){ 
-            dispatch(setIdle());
+            // dispatch(setIdle());
         }
     }, [isFocused]);
 
     useEffect(() => {
-        if (status === 'idle') {
-            // dispatch(fetchDashboardValues(user.token));
+        if (status === appStates.APP_NOT_READY) {
             dispatch(downloadAppDataToStorage(user.token));
         } 
     }, [dispatch, status]);

@@ -3,7 +3,7 @@ import axios from 'axios';
 const baseUrl = 'http://vartafrica.com/api/';
 class Storage {
 
-    saveUser(user) {
+    static saveUser(user) {
 
     }
 
@@ -12,8 +12,16 @@ class Storage {
     }
 
     static async saveData(key, data) {
+        
         try{
-            await AsyncStorage.setItem(key, JSON.stringify(data));
+            const existingData = await getData(key);
+            if (existingData === null) {
+                await AsyncStorage.setItem(key, JSON.stringify([data]));
+            }
+            else {
+                await AsyncStorage.setItem(key, JSON.stringify([...existingData, data]));
+            }
+
             const response = {
                 success: true,
                 message: data.requestInfo.message
@@ -22,7 +30,15 @@ class Storage {
         }catch(e) {
 
         }
-        
+    }
+
+    static async getData(key) {
+        try {
+            const response = await AsyncStorage.getItem(key)
+            return response != null ? JSON.parse(jsonValue) : null
+        }catch ( e ) {
+            return new Error (e.message)
+        }
     }
 
     syncOne(requestInfo) {
@@ -36,12 +52,12 @@ class Storage {
         }
     }
 
-    static makePostRequest(requestInfo){
+    static async makePostRequest(requestInfo){
         try {
             const response = await fetch(`${baseUrl}${requestInfo.url}`, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify(newFarmer),
+                body: JSON.stringify(requestInfo.body),
                 headers: {
                     'Content-Type': 'application/json',
                     'token': token
@@ -55,7 +71,7 @@ class Storage {
         }
     }
 
-    static makeGetRequest(requestInfo) {
+    static async makeGetRequest(requestInfo) {
         try {
             const response = await axios({
                 url: `${baseUrl}${requestInfo.url}`,
