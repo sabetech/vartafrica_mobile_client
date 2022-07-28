@@ -31,7 +31,7 @@ export default function Listings ({ route, navigation }) {
         // }
     },[isFocused]);
 
-    console.log("data",data);
+    //console.log("data",data);
 
     useEffect(() => {
         //find out what page this is ... 
@@ -46,7 +46,7 @@ export default function Listings ({ route, navigation }) {
                 }
             break;
             case 'List Orders':
-                
+                //console.log(farmerOrders);
                 if (status === appStates.APP_READY) {
                     setData((prev) => [...prev, ...farmerOrders.map(
                                                     order => ({
