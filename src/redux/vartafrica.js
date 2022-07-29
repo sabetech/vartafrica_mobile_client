@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk, isRejectedWithValue } from '@reduxjs/toolkit';
-import { act } from 'react-test-renderer';
 import { appStates, storageKeys } from '../constants';
 import { 
   getDashboardValues, 
@@ -174,10 +173,7 @@ export const registerFarmerThunk = createAsyncThunk('farmer/register', async ({ 
       return {
         message, 
         newFarmer: {
-          id: uuidv4(),
-          name: newFarmer.first_name,
-          last_name: newFarmer.last_name,
-          contact: newFarmer.mobileNumber
+          ...new_storage_farmer
         }
       };
     }
@@ -215,7 +211,7 @@ export const registerFarmerThunk = createAsyncThunk('farmer/register', async ({ 
 //   }
 // });
 
-export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {order, ui_info, token} ) => {
+export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {order, ui_info, token},{ getState } ) => {
   try {
     const requestInfo = {
       url: 'register',
@@ -230,28 +226,33 @@ export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {o
     }
 
     console.log(order);
-      return;
-    const new_storage_order = {
-      id: uuidv4(),
-      name: ,
-      variety: newFarmer.last_name,
-      quantity_ordered: order.seed_quantity.reduce((prev, curr, i) => prev + curr, 0),
-      net_order_value: order.net_order_value
-    };
-    const response = await Storage.saveData( storageKeys.ORDERS,  );
+      
+    const curState = getState();
+    const myfarmer = curState.vartafrica.registeredFarmers.find(_myfarmer => _myfarmer.contact == order.farmers);
+    if (!myfarmer) 
+      throw new Error("Could not find farmer");
+
+    const new_storage_orders = [];
+    for(let i = 0;i < order.variety.length;i++){
+
+      const new_storage_order = {
+        id: uuidv4(),
+        name: myfarmer.name,
+        variety: order.variety[i],
+        quantity_ordered: order.seed_quantity[i],
+        net_order_value: order.net_order_value
+      };
+      new_storage_orders.push(new_storage_order);
+    }
+    const response = await Storage.saveFormDataArray( storageKeys.ORDERS,  { storage_data: new_storage_orders, requestInfo });
     
     if (response.success) {
       const { message } = response;
       return {
         message, 
-        order: {
-          id: uuidv4(),
-          name: ui_info[0].name,
-          variety: ui_info[0].variety,
-          quantity_ordered: ui_info[0].quantity_ordered,
-          net_order_value: null,
-          synced: false
-        }
+        new_orders: [
+          ...new_storage_orders
+        ]
       };
     }
 
@@ -259,33 +260,8 @@ export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {o
     return err.message;
   }
 });
-  
-//   try{
-//       const response = await saveOrderByAgentAPI(order, token);
-//       if (response.success) {
-//         const { message } = response;
-//         return message;
-//       }
-//     }catch( err ){
-//       console.log(err.message);
-//       return err.message;
-//     }
-// });
 
-// export const getAllFarmerDebits = createAsyncThunk('agent/orders', async ( token ) => {
-//   try {
-//     const response = await getOrdersByAgent(token);
-//     if (response.success) {
-//       const { data } = response;
-//       return data;
-//     }
-
-//   } catch ( err ) {
-//     return err.message;
-//   }
-// });
-
-export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { debit, debit_ui_info, token} ) => {
+export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { debit, debit_ui_info, token}, { getState } ) => {
   try {
     const requestInfo = {
       url: 'debit',
@@ -298,6 +274,21 @@ export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { de
       message: 'Debit has been saved successfully',
       synced: false
     }
+
+    const curState = getState();
+    console.log("Debit id", debit.user_id)
+    console.log("Debit this ",debit)
+    console.log("farmers ",curState.vartafrica.registeredFarmers)
+    console.log(typeof curState.vartafrica.registeredFarmers)
+    const myfarmer = curState.vartafrica.registeredFarmers.find(myfarmer => myfarmer.id == debit.user_id)
+    console.log("farmer: ",myfarmer);
+
+    return;
+    // const new_storage_debit = {
+    //   id: uuidv4(),
+    //   username: myfarmer.,
+    //   amount
+    // }
 
     const response = await Storage.saveData( storageKeys.DEBITS, { debit, token, requestInfo } );
     
@@ -414,10 +405,8 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
         .addCase(saveOrderByAgent.fulfilled, (state, action) => {
           
           state.success_msg = action.payload.message;
-          console.log(action.payload);
-          console.log(action.payload.order);
           
-          state.farmerOrders = [...state.farmerOrders, action.payload.order];
+          state.farmerOrders = [...state.farmerOrders, ...action.payload.new_orders];
           state.dashboard_values.total_orders = state.farmerOrders.length;
 
           state.status = appStates.ORDER_SAVED;
@@ -426,17 +415,6 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
           state.status = 'failed';
           state.error = action.error.message;
         })
-        // .addCase(getAllOrdersByAgent.pending, (state) => {
-        //   state.status = 'loading';
-        // })
-        // .addCase(getAllOrdersByAgent.fulfilled, (state, action) => {
-        //   state.status = 'listings-success';
-        //   state.farmerOrders = action.payload;
-        // })
-        // .addCase(getAllOrdersByAgent.rejected, (state, action) => {
-        //   state.status = 'failed';
-        //   state.error = action.error.message;
-        // })
         .addCase(saveFarmerDebit.pending, (state) => {
           state.status = 'saving-debit';
         })
@@ -469,28 +447,6 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
           state.status = 'failed';
           state.error = action.error.message;
         })
-        // .addCase(cardsUsed.pending, (state) => {
-        //   state.status = 'loading';
-        // })
-        // .addCase(cardsUsed.fulfilled, (state, action) => {
-        //   state.status = 'listings-success';
-        //   state.cardsUsed = action.payload;
-        // })
-        // .addCase(cardsUsed.rejected, (state, action) => {
-        //   state.status = 'failed';
-        //   state.error = action.error.message;
-        // })
-        // .addCase(deductionlist.pending, (state) => {
-        //   state.status = 'loading';
-        // })
-        // .addCase(deductionlist.fulfilled, (state, action) => {
-        //   state.status = 'listings-success';
-        //   state.deductions = action.payload;
-        // })
-        // .addCase(deductionlist.rejected, (state, action) => {
-        //   state.status = 'failed';
-        //   state.error = action.error.message;
-        // });
     }
   });
 
