@@ -63,13 +63,8 @@ export default function NewFarmerDebit({ navigation }) {
             amount,
         }
         
-        
         const farmerDebitThunkArgs = {
             debit,
-            debit_ui_info:{
-                name: farmerInstance.name,
-                amount: amount
-            },
             token: user.token
         }
         dispatch(saveFarmerDebit(farmerDebitThunkArgs));

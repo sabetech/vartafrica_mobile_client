@@ -62,7 +62,7 @@ export default function Listings ({ route, navigation }) {
                         cardsUsedListItem => (
                             {
                                 title: cardsUsedListItem.used_by,
-                                subTitle: cardsUsedListItem.amount
+                                subTitle: cardsUsedListItem.serial
                             }
                         )
                     )]);
@@ -89,7 +89,12 @@ export default function Listings ({ route, navigation }) {
                 <FlatList 
                     data={data}
                     renderItem={
-                        ({item}) => <View style={styles.listItem}><Text style={styles.item}>{item.title}</Text><Text style={styles.itemRight}>{item.subTitle}</Text></View>
+                        ({item}) => <View style={styles.listItem}>
+                                        <View style={styles.content}>
+                                            <Text style={styles.item}>{item.title}</Text>
+                                            <Text style={styles.itemRight}>{item.subTitle}</Text>
+                                        </View>
+                                    </View>
                     }
                 />
                 :
@@ -107,21 +112,27 @@ const styles = StyleSheet.create({
      flex: 1,
      paddingTop: 22
     },
+    content: {
+        marginHorizontal: 20,
+        justifyContent: 'center',
+        marginTop: 10
+    },
     item: {
-      marginHorizontal: 20,
       fontSize: 18,
-      height: 44,
-      textAlign: 'left'
     },
     itemRight:{
-        textAlign: 'right',
-        height: 44,
-        fontSize: 18,
-        marginHorizontal: 20
+        fontSize: 15,
     },
     listItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        borderRadius: 10,
+        height: 70,
+        // borderWidth: 1,
+        marginHorizontal: 15,
+        marginVertical: 5,
+        backgroundColor: 'white',
+        elevation: 5
+
     },
     noDataStyle: {
         flexDirection: 'column',

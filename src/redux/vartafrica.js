@@ -58,8 +58,6 @@ const fetchDashboardValuesFromServer = async (token) => {
     const response = await getDashboardValues(token);
     if (response.success) {
       const { data } = response;
-      Storage.saveData(storageKeys.DASHBOARD_VALUES, data);
-      
       return data;
     }    
   }catch (err) {
@@ -163,7 +161,8 @@ export const registerFarmerThunk = createAsyncThunk('farmer/register', async ({ 
       id: uuidv4(),
       name: newFarmer.first_name,
       last_name: newFarmer.last_name,
-      contact: newFarmer.mobileNumber
+      contact: newFarmer.mobileNumber,
+      username: newFarmer.username
     };
 
     const response = await Storage.saveFormData( storageKeys.FARMERS, { storage_data: new_storage_farmer, requestInfo } );
@@ -181,35 +180,7 @@ export const registerFarmerThunk = createAsyncThunk('farmer/register', async ({ 
   }catch ( err ) {
     return err.message;
   }
-}); 
-
-// export const getAllFarmersByAgent = createAsyncThunk('farmer/list', async (token) => {
-//   try {
-//     const response = await getFarmersByAgent(token);
-    
-//     if (response.data.success) {
-//       const { data } = response.data;
-      
-//       return data;
-//     }
-
-//   } catch ( err ) {
-//     return err.message;
-//   }
-// });
-
-// export const getAllOrdersByAgent = createAsyncThunk('agent/orders', async ( token ) => {
-//   try {
-//     const response = await getOrdersByAgent(token);
-//     if (response.success) {
-//       const { data } = response;
-//       return data;
-//     }
-
-//   } catch ( err ) {
-//     return err.message;
-//   }
-// });
+});
 
 export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {order, ui_info, token},{ getState } ) => {
   try {
@@ -261,7 +232,7 @@ export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {o
   }
 });
 
-export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { debit, debit_ui_info, token}, { getState } ) => {
+export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { debit, token}, { getState } ) => {
   try {
     const requestInfo = {
       url: 'debit',
@@ -274,33 +245,27 @@ export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { de
       message: 'Debit has been saved successfully',
       synced: false
     }
-
+    
+    console.log(debit)
+    
     const curState = getState();
-    console.log("Debit id", debit.user_id)
-    console.log("Debit this ",debit)
-    console.log("farmers ",curState.vartafrica.registeredFarmers)
-    console.log(typeof curState.vartafrica.registeredFarmers)
     const myfarmer = curState.vartafrica.registeredFarmers.find(myfarmer => myfarmer.id == debit.user_id)
-    console.log("farmer: ",myfarmer);
+    console.log(myfarmer)
 
-    return;
-    // const new_storage_debit = {
-    //   id: uuidv4(),
-    //   username: myfarmer.,
-    //   amount
-    // }
+    const new_storage_debit = {
+      id: uuidv4(),
+      username: myfarmer.name,
+      amount: debit.amount
+    }
 
-    const response = await Storage.saveData( storageKeys.DEBITS, { debit, token, requestInfo } );
+    const response = await Storage.saveFormData( storageKeys.DEBITS, { storage_data: new_storage_debit, requestInfo } );
     
     if (response.success) {
       const { message } = response;
       return {
-        message, 
+        message,
         debit: {
-          id: uuidv4(),
-          username: debit_ui_info.name,
-          amount: debit_ui_info.amount,
-          synced: false
+          ...new_storage_debit
         }
       };
     }
@@ -310,7 +275,7 @@ export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { de
   }
 });
 
-export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rechargeInfo, recharge_ui_info, token}, { rejectWithValue } ) => {
+export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rechargeInfo, token}, { getState } ) => {
   try {
     const requestInfo = {
       url: 'recharge',
@@ -324,17 +289,24 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
       synced: false
     }
 
-    const response = await Storage.saveData( storageKeys.RECHARGE, { rechargeInfo, token, requestInfo } );
+    const curState = getState();
+    const myfarmer = curState.vartafrica.registeredFarmers.find(myfarmer => myfarmer.id == rechargeInfo.farmers)
+    
+    const new_storage_recharge = {
+      id: uuidv4(),
+      amount: 'x',
+      serial: rechargeInfo.serial_number,
+      used_by: myfarmer.name
+    }
+    
+    const response = await Storage.saveFormData( storageKeys.RECHARGE, { storage_data: new_storage_recharge, requestInfo} );
     
     if (response.success) {
       const { message } = response;
       return {
         message, 
         recharge: {
-          id: uuidv4(),
-          serial: rechargeInfo.serial_number,
-          used_by: recharge_ui_info.used_by,
-          synced: false
+          ...new_storage_recharge
         }
       };
     }
@@ -354,7 +326,7 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
         deductions: [],
         crops: [],
         varieties: [],
-        status: 'app-not-ready',
+        status: appStates.APP_NOT_READY,
         success: false,
         success_msg: '',
         error: null,
@@ -421,8 +393,8 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
         .addCase(saveFarmerDebit.fulfilled, (state, action) => {
           
           state.success_msg = action.payload.message;
-          state.success = action.payload.success;
           state.deductions = [...state.deductions, action.payload.debit];
+          state.dashboard_values.total_deductions = state.dashboard_values.total_deductions + 1 
 
           // verify: state.dashboard_values.
           state.status = appStates.DEBIT_SAVED;
@@ -437,7 +409,6 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
         .addCase(recharge.fulfilled, (state, action) => {
           
           state.success_msg = action.payload.message;
-          state.success = action.payload.success;
           state.cardsUsed = [...state.cardsUsed, action.payload.recharge];
 
           state.status = appStates.RECHARGE_SAVED;

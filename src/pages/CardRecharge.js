@@ -8,9 +8,8 @@ import { AuthContext } from "../context/AuthContext"
 import { getAllFarmersByAgent, 
     getAllRegisteredFarmers, 
     recharge,
-    getStatus, 
+    getStatus,
     setIdle,
-    getSuccess,
     getSuccessMsg
    } from '../redux/vartafrica';
 import { appStates } from "../constants";
@@ -23,7 +22,6 @@ export default function CardRecharge({ navigation }) {
 
     const registeredFarmers = useSelector(getAllRegisteredFarmers);
     const status = useSelector(getStatus);
-    const success = useSelector(getSuccess);
     const responseMsg = useSelector(getSuccessMsg);
     const { user } = useContext(AuthContext);
     
@@ -36,22 +34,16 @@ export default function CardRecharge({ navigation }) {
     },[registeredFarmers]);
 
     useEffect(() => {
-        if (status === 'idle') {
-            dispatch(getAllFarmersByAgent(user.token));
+        if (status === appStates.RECHARGE_SAVED) {
+            Alert.alert('Success', responseMsg, [
+                { text: "OK", onPress: () => dispatch(setIdle()) }
+            ]);
+            navigation.navigate('Dashboard');
         }
-
-        if (status === 'saving-recharge') {
-            Alert.alert("Loading ...", "Saving Recharge ...");
-        }
-
-        if (status === 'farmer-recharge-success'){
-            if (success) {
-                Alert.alert('Success', responseMsg);
-                navigation.navigate('Dashboard');
-            }else{
-                Alert.alert('Failure', responseMsg);
-            }
-        }
+        
+        if (status === appStates.FAILED){
+            Alert.alert('Failure', responseMsg);
+        }        
        
     }, [dispatch, status]);
 
@@ -68,13 +60,8 @@ export default function CardRecharge({ navigation }) {
             serial_number
         }
 
-        const recharge_ui_info = {
-            used_by: farmer.name
-        }
-        
         const farmerRechargeThunkArgs = {
             rechargeInfo,
-            recharge_ui_info,
             token: user.token
         }
         dispatch(recharge(farmerRechargeThunkArgs));

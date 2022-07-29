@@ -7,7 +7,7 @@
  */
 
  import React, { useContext, useEffect, useState } from 'react';
- import { SafeAreaView, StyleSheet, TextInput, ActivityIndicator, View, Text, TouchableOpacity, Image } from 'react-native';
+ import { SafeAreaView, StyleSheet, TextInput, ActivityIndicator, View, Text, TouchableOpacity, Image, Alert } from 'react-native';
  import { AuthContext } from '../context/AuthContext';
  import { login } from '../services/api';
  import Storage from '../services/storage';
@@ -27,7 +27,7 @@
      //authenticate get a token and move on
      setLoading(true);
      if (user != null) navigation.navigate('Dashboard');
-
+    try{
      const loggedUser = await login({username, password});
      
      if (loggedUser.success){
@@ -36,8 +36,12 @@
         Storage.saveUser(loggedUser);
         navigation.navigate('Dashboard');
      } else {
-        console.log("AN ERROR OCCURED");
+        Alert.alert("Failure", "Login Failed")
      }
+    }catch( e ) {
+        Alert.alert("Failure", "No internet!")
+    }
+     
  }
 
      return (
