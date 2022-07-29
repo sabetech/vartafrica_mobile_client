@@ -1,12 +1,15 @@
 import React, { useState, useContext, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
-import { TextInput } from 'react-native-element-textinput';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, SafeAreaView, KeyboardAvoidingView, FlatList } from "react-native";
+import { TextInput, AutoComplete } from 'react-native-element-textinput';
 import Geolocation from 'react-native-geolocation-service';
 import { AuthContext } from "../context/AuthContext";
 import { useDispatch, useSelector } from 'react-redux';
 import { registerFarmerThunk, getStatus, setIdle } from '../redux/vartafrica';
 import { Picker } from '@react-native-picker/picker';
 import { PermissionsAndroid } from 'react-native';
+import { appStates } from "../constants";
+import { countries } from "../resources/countries";
+import { LogBox } from 'react-native';
 
 
 export default function RegisterFarmer({ navigation }) {
@@ -14,7 +17,7 @@ export default function RegisterFarmer({ navigation }) {
     const [first_name, setFirstname] = useState("sample");
     const [last_name, setLastname] = useState("test here");
     const [user_name, setUsername] = useState("jiaofe_5");
-    const [country_code, setCountryCode] = useState("+234");
+    const [country_code, setCountryCode] = useState("");
     const [mobileNumber, setMobileNumber] = useState("89437433");
     const [age, setAge] = useState("24");
     const [sex, setSex] = useState("male");
@@ -36,6 +39,7 @@ export default function RegisterFarmer({ navigation }) {
     const status = useSelector(getStatus);
 
     useEffect(() => {
+        LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
         let isSubscribed = true;
         getCurrentPosition((result) => {
             if (isSubscribed) {
@@ -50,18 +54,13 @@ export default function RegisterFarmer({ navigation }) {
     }, []);
 
     useEffect(() => {
-        console.log(status)
-        if (status == 'register-farmer-success'){
-            Alert.alert("Success", "Farmer Registered Successfully");
-            dispatch(setIdle());        
-        }
-        console.log(status);
-        if (status == 'idle') {
+        //console.log(status)
+        if (status == appStates.FARMER_SAVED){
+            Alert.alert("Success", "Farmer Registered Successfully", [
+                
+                { text: "OK", onPress: () => dispatch(setIdle()) }
+              ]);
             navigation.goBack();
-        }
-
-        if (status == 'loading'){
-            Alert.alert("Loading ...", "Saving Farmer ...");
         }
         
         return (() => {
@@ -154,9 +153,12 @@ export default function RegisterFarmer({ navigation }) {
         
     }
 
-    return (<View style={{padding: 10, flex: 1}}>
+    return (
+        <SafeAreaView style={{flex: 1}}>
+            
+        <View style={{padding: 10, flex: 1}}>
         <Text >Register Farmer</Text>
-        <ScrollView >
+        <ScrollView>
         <TextInput style={ styles.input } 
                     inputStyle={styles.inputStyle}
                     labelStyle={styles.labelStyle} onChangeText={(text) => setFirstname(text)} value={first_name} placeholder="First name" label="First name" />
@@ -170,12 +172,27 @@ export default function RegisterFarmer({ navigation }) {
             inputStyle={styles.inputStyle}
             labelStyle={styles.labelStyle}
             onChangeText={(text) => setUsername(text)} value={user_name} placeholder="Username" label="Username" />
-
-        <TextInput style={styles.input} 
-            inputStyle={styles.inputStyle}
-            labelStyle={styles.labelStyle}
-            onChangeText={(text) => setCountryCode(text)} value={country_code} placeholder="+235" label="Country Code" />
-
+        
+            <AutoComplete
+                value={country_code}
+                data={[...
+                    countries && countries?.map(
+                        country => country.phonecode.toString()
+                    )]}
+                style={styles.input}
+                inputStyle={styles.inputStyle}
+                labelStyle={styles.labelStyle}
+                placeholderStyle={styles.placeholderStyleAutoComplete}
+                textErrorStyle={styles.textErrorStyleAutoComplete}
+                label="Country Code (Type to Search)"
+                placeholder="+235"
+                placeholderTextColor="gray"
+                onChangeText={e => {
+                    setCountryCode(e);
+                }}
+                numeric={true}
+            />   
+        
         <TextInput style={styles.input} 
             inputStyle={styles.inputStyle}
             labelStyle={styles.labelStyle}
@@ -218,10 +235,24 @@ export default function RegisterFarmer({ navigation }) {
             labelStyle={styles.labelStyle}
             onChangeText={(text) => setDistrict(text)} value={district} placeholder="District ..." label="District" />
 
-        <TextInput style={styles.input} 
-            inputStyle={styles.inputStyle}
-            labelStyle={styles.labelStyle}
-            onChangeText={(text) => setCountry(text)} value={country} placeholder="Country here" label="Country" />
+        <AutoComplete
+                value={country}
+                data={[...
+                    countries && countries?.map(
+                        country => country.name
+                    )]}
+                style={styles.input}
+                inputStyle={styles.inputStyle}
+                labelStyle={styles.labelStyle}
+                placeholderStyle={styles.placeholderStyleAutoComplete}
+                textErrorStyle={styles.textErrorStyleAutoComplete}
+                label="Country Name (Type to Search)"
+                placeholder="Uganda"
+                placeholderTextColor="gray"
+                onChangeText={e => {
+                    setCountry(e);
+                }}
+            /> 
 
         <TextInput style={styles.input} 
             inputStyle={styles.inputStyle}
@@ -238,10 +269,17 @@ export default function RegisterFarmer({ navigation }) {
             labelStyle={styles.labelStyle}
             onChangeText={(text) => setLandarea(text)} value={land_area} placeholder="132" label="Land Area" />
 
-        <TextInput style={styles.input} 
-            inputStyle={styles.inputStyle}
-            labelStyle={styles.labelStyle}
-            onChangeText={(text) => setFertilizer(text)} value={fertilizer} placeholder="Fertilizer" label="Fertilizer" />
+        <Text>Fertilizer</Text>
+        <Picker
+            prompt={"Fertilizer"}
+            selectedValue={fertilizer}
+            onValueChange={(itemValue, itemIndex) =>
+                setFertilizer(itemValue)
+            }
+        >
+            <Picker.Item label="Yes" value="yes" />
+            <Picker.Item label="No" value="no" />
+        </Picker>
 
         <Text>Disabled?</Text>
         <Picker
@@ -282,9 +320,8 @@ export default function RegisterFarmer({ navigation }) {
         </TouchableOpacity>
     </View>
     </ScrollView>
-
-
-    </View>);
+    </View>
+    </SafeAreaView>);
 }
 
 const styles = StyleSheet.create({
@@ -327,6 +364,24 @@ const styles = StyleSheet.create({
     },
     passwordTextField: {
         
-    }
+    },
+    inputAutocomplete: {
+        height: 55,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        backgroundColor: 'white',
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 1,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 1.41,
+        elevation: 2,
+      },
+      inputStyleAutoComplete: { fontSize: 16 },
+      labelStyleAutoComplete: { fontSize: 14 },
+      placeholderStyleAutoComplete: { fontSize: 16 },
+      textErrorStyleAutoComplete: { fontSize: 16 },
 
 });

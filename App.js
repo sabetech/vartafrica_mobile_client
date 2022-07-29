@@ -13,6 +13,10 @@ import FarmerOrders from "./src/pages/FarmerOrders";
 import Listings from "./src/pages/Listings";
 import { AuthContext } from "./src/context/AuthContext";
 
+if(__DEV__) {
+  import('./ReactotronConfig').then(() => console.log('Reactotron Configured'))
+}
+
 const Stack = createNativeStackNavigator();
 
 function App () {

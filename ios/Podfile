@@ -19,6 +19,8 @@ target 'vart_mobile' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  pod 'react-native-uuid-generator', :path => '../node_modules/react-native-uuid-generator'
+
   target 'vart_mobileTests' do
     inherit! :complete
     # Pods for testing

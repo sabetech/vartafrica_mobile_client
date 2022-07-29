@@ -1,21 +1,17 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
-import { useDispatch, useSelector } from 'react-redux'; 
+import { useSelector } from 'react-redux'; 
 import { AuthContext } from "../context/AuthContext"
 import { useIsFocused } from "@react-navigation/native";
-import { getAllFarmersByAgent, 
-        getAllRegisteredFarmers, 
+import { getAllRegisteredFarmers, 
         getAllFarmerOrders, 
-        getAllOrdersByAgent, 
-        deductionlist,
         getAllDeductions,
         getAllCardsUsed,
-        cardsUsed,
-        getStatus, setIdle } from '../redux/vartafrica';
+        getStatus } from '../redux/vartafrica';
+import { appStates } from "../constants";
 
 export default function Listings ({ route, navigation }) {
     const [ data, setData ] = useState([]);
-    const dispatch = useDispatch();
     const registeredFarmers = useSelector(getAllRegisteredFarmers);
     const farmerOrders = useSelector(getAllFarmerOrders);
     const deductions = useSelector(getAllDeductions);
@@ -30,21 +26,18 @@ export default function Listings ({ route, navigation }) {
     }, []);
 
     useEffect(() => {
-        if (isFocused){
-            dispatch(setIdle());
-        }
+        // if (isFocused){
+        //     dispatch(setIdle());
+        // }
     },[isFocused]);
 
-    console.log("data",data);
+    //console.log("data",data);
 
     useEffect(() => {
         //find out what page this is ... 
         switch(title) {
             case 'List Farmers':
-                if (status === 'idle') {
-                    dispatch(getAllFarmersByAgent(user.token));
-                }
-                if (status === 'listings-success') {
+                if (status === appStates.APP_READY) {
                     setData((prev) => [...prev, ...registeredFarmers.map(
                                                 farmer => ({
                                                                 title: farmer.name+" "+farmer.last_name,
@@ -53,10 +46,8 @@ export default function Listings ({ route, navigation }) {
                 }
             break;
             case 'List Orders':
-                if (status === 'idle') {
-                    dispatch(getAllOrdersByAgent(user.token));
-                }
-                if (status === 'listings-success') {
+                //console.log(farmerOrders);
+                if (status === appStates.APP_READY) {
                     setData((prev) => [...prev, ...farmerOrders.map(
                                                     order => ({
                                                             title: `${order.name} (${order.variety})`,
@@ -65,28 +56,21 @@ export default function Listings ({ route, navigation }) {
                 }
             break;
             case 'Cards Used':
-                console.log("Status: ", status);
-                if (status === 'idle') {
-                    dispatch(cardsUsed(user.token));
-                }
-                if (status === 'listings-success') {
-                    console.log(cardsUsedList);
+                
+                if (status === appStates.APP_READY) {
                     setData((prev) => [...prev, ...cardsUsedList.map(
                         cardsUsedListItem => (
                             {
                                 title: cardsUsedListItem.used_by,
-                                subTitle: cardsUsedListItem.amount
+                                subTitle: cardsUsedListItem.serial
                             }
                         )
                     )]);
                 }
             break;
             case 'List of Deductions':
-                if (status === 'idle') {
-                    dispatch(deductionlist(user.token));
-                }
-                
-                if (status === 'listings-success') {
+            
+                if (status === appStates.APP_READY) {
                     setData((prev) => [...prev, ...deductions.map(
                         deduction => ({
                             title: deduction.username,
@@ -96,10 +80,7 @@ export default function Listings ({ route, navigation }) {
                 }
             break;
         }
-
-        
-
-    },[dispatch, status]);
+    },[status]);
 
     return (
         <View>
@@ -108,7 +89,12 @@ export default function Listings ({ route, navigation }) {
                 <FlatList 
                     data={data}
                     renderItem={
-                        ({item}) => <View style={styles.listItem}><Text style={styles.item}>{item.title}</Text><Text style={styles.itemRight}>{item.subTitle}</Text></View>
+                        ({item}) => <View style={styles.listItem}>
+                                        <View style={styles.content}>
+                                            <Text style={styles.item}>{item.title}</Text>
+                                            <Text style={styles.itemRight}>{item.subTitle}</Text>
+                                        </View>
+                                    </View>
                     }
                 />
                 :
@@ -126,21 +112,27 @@ const styles = StyleSheet.create({
      flex: 1,
      paddingTop: 22
     },
+    content: {
+        marginHorizontal: 20,
+        justifyContent: 'center',
+        marginTop: 10
+    },
     item: {
-      marginHorizontal: 20,
       fontSize: 18,
-      height: 44,
-      textAlign: 'left'
     },
     itemRight:{
-        textAlign: 'right',
-        height: 44,
-        fontSize: 18,
-        marginHorizontal: 20
+        fontSize: 15,
     },
     listItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        borderRadius: 10,
+        height: 70,
+        // borderWidth: 1,
+        marginHorizontal: 15,
+        marginVertical: 5,
+        backgroundColor: 'white',
+        elevation: 5
+
     },
     noDataStyle: {
         flexDirection: 'column',

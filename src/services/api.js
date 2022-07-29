@@ -1,4 +1,5 @@
 import axios from "axios";
+
 const baseUrl = 'http://vartafrica.com/api/';
 export const login = async ({username, password}) => {
     try{
@@ -47,8 +48,9 @@ export const getFarmersByAgent = async (token) => {
                 'Content-Type': 'application/json',
                 'token': token
             }
-        })
-        return response;
+        });
+
+        return response.data;
     } catch ( e ) {
         throw new Error(e.message());
     }
@@ -175,5 +177,46 @@ export const rechargeAPI = async (rechargeInfo, token) => {
         return response.json();
     }catch ( e ) {
         throw new Error(e.message());
+    }
+}
+
+export const getListOfCrops = async (token) => {
+    try {
+        
+        const response = await axios({
+            url: `${baseUrl}crop`,
+            method: 'GET',
+            mode:'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': token
+              }
+        });
+        
+        return response.data;
+
+
+    } catch ( err ) {
+        throw new Error(err.message());
+    }
+}
+
+export const getListOfvariety = async (token) => {
+    try {
+        
+        const response = await axios({
+            url: `${baseUrl}variety`,
+            method: 'GET',
+            mode:'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': token
+              }
+        });
+        return response.data;
+
+
+    } catch ( err ) {
+        throw new Error(err.message());
     }
 }

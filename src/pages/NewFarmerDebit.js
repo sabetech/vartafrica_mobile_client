@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useDispatch, useSelector } from 'react-redux'; 
-import { TextInput } from "react-native-element-textinput";
+import { TextInput, AutoComplete } from "react-native-element-textinput";
 import { useIsFocused } from "@react-navigation/native";
 import {Picker} from '@react-native-picker/picker';
 import { AuthContext } from "../context/AuthContext"
@@ -13,10 +13,11 @@ import { getAllFarmersByAgent,
     getSuccess,
     getSuccessMsg
    } from '../redux/vartafrica';
+import { appStates } from "../constants";
 
 
 export default function NewFarmerDebit({ navigation }) {
-    const [user_id, setSelectedFarmer] = useState();
+    const [selectedFarmer, setSelectedFarmer] = useState();
     const [amount, setAmount] = useState();
 
     const registeredFarmers = useSelector(getAllRegisteredFarmers);
@@ -26,45 +27,40 @@ export default function NewFarmerDebit({ navigation }) {
     const { user } = useContext(AuthContext);
     
     dispatch = useDispatch();
-    const isFocused = useIsFocused();
 
     useEffect(() => {
 
-        if (isFocused)
-            dispatch(setIdle());
-
-    }, [isFocused]);
-
-    useEffect(() => {
-
-        setSelectedFarmer(registeredFarmers[0]?.id);
+        setSelectedFarmer(registeredFarmers[0]?.name+" "+registeredFarmers[0]?.last_name + "("+registeredFarmers[0]?.contact+")");
 
     },[registeredFarmers]);
 
     useEffect(() => {
-        if (status === 'idle') {
-            dispatch(getAllFarmersByAgent(user.token));
-        }
+       
+        if (status === appStates.DEBIT_SAVED){
 
-        if (status === 'saving-debit') {
-            Alert.alert("Loading ...", "Saving Order ...");
-        }
-
-        if (status === 'farmer-debit-success'){
-            if (success) {
-                Alert.alert('Success', responseMsg);
-                navigation.navigate('Dashboard');
-            }else{
-                Alert.alert('Failure', responseMsg);
-            }
+            Alert.alert('Success', responseMsg,  [
+                { text: "OK", onPress: () => dispatch(setIdle()) }
+              ]);
+            navigation.navigate('Dashboard');
+           
         }
        
     }, [dispatch, status]);
 
+    const getSelectedFarmerContact = (farmerText) => {
+        let firstBracket = farmerText.indexOf("(");
+        let secondBracket = farmerText.indexOf(")");
+
+        let actualValue = farmerText.substring(firstBracket + 1, secondBracket);
+        return actualValue;
+    }
+
     const submitFarmerDebit = () => {
+        const farmerContact = getSelectedFarmerContact(selectedFarmer)
+        const farmerInstance = registeredFarmers.find(regFarmer => regFarmer.contact == farmerContact);
         const debit = {
-            user_id,
-            amount
+            user_id: farmerInstance.id,
+            amount,
         }
         
         const farmerDebitThunkArgs = {
@@ -78,20 +74,37 @@ export default function NewFarmerDebit({ navigation }) {
         <View style={{padding: 10, flex: 1}}>
             <Text style={styles.topTitle}>Farmer Debit</Text>
             <Text>Select Farmer</Text>
-                <Picker
-                    selectedValue={user_id}
-                    onValueChange={
-                        (itemValue, itemIndex) =>
-                        setSelectedFarmer(itemValue)
-                    }
-                    prompt={"Select Farmer"}
-                    >
-                        {
-                            registeredFarmers && registeredFarmers?.map(farmer => 
-                                <Picker.Item key={ farmer.id } label={ farmer.name+" "+farmer.last_name } value={ farmer.id } />
-                            )
-                        }
-                </Picker>
+            {
+                (status === 'loading') ? <ActivityIndicator /> 
+                :
+                registeredFarmers.length == 0 ? 
+                <Text style={{textAlign:'center'}}>
+                    You have no farmers available. {'\n'}
+                    Add a farmer from the 
+                    <Text style={{color: 'blue'}}
+                        onPress={() => navigation.navigate('RegisterFarmer')}
+                    > add farmer page</Text>
+                     to be able to make an order!</Text>
+                :
+                <View>
+                    <AutoComplete
+                value={selectedFarmer}
+                data={[...
+                    registeredFarmers && registeredFarmers?.map(farmer => farmer.name+" "+farmer.last_name + "("+farmer.contact+")") 
+                ]}
+                style={styles.input}
+                inputStyle={styles.inputStyle}
+                labelStyle={styles.labelStyle}
+                placeholderStyle={styles.placeholderStyleAutoComplete}
+                textErrorStyle={styles.textErrorStyleAutoComplete}
+                label="Farmer (Type to Search)"
+                placeholder="..."
+                placeholderTextColor="gray"
+                onChangeText={e => {
+                    setSelectedFarmer(e);
+                }}
+            /> 
+
             <TextInput 
                 style={styles.input} 
                 inputStyle={styles.inputStyle}
@@ -104,6 +117,9 @@ export default function NewFarmerDebit({ navigation }) {
                         <Text style={ styles.submitText }>Submit</Text>
                     </TouchableOpacity>
                 </View>
+                </View>
+            }
+            
         </View>
     );
 

@@ -8,11 +8,11 @@ import { AuthContext } from "../context/AuthContext"
 import { getAllFarmersByAgent, 
     getAllRegisteredFarmers, 
     recharge,
-    getStatus, 
+    getStatus,
     setIdle,
-    getSuccess,
     getSuccessMsg
    } from '../redux/vartafrica';
+import { appStates } from "../constants";
 
 
 export default function CardRecharge({ navigation }) {
@@ -22,19 +22,10 @@ export default function CardRecharge({ navigation }) {
 
     const registeredFarmers = useSelector(getAllRegisteredFarmers);
     const status = useSelector(getStatus);
-    const success = useSelector(getSuccess);
     const responseMsg = useSelector(getSuccessMsg);
     const { user } = useContext(AuthContext);
     
     dispatch = useDispatch();
-    const isFocused = useIsFocused();
-
-    useEffect(() => {
-
-        if (isFocused)
-            dispatch(setIdle());
-
-    }, [isFocused]);
 
     useEffect(() => {
 
@@ -43,22 +34,16 @@ export default function CardRecharge({ navigation }) {
     },[registeredFarmers]);
 
     useEffect(() => {
-        if (status === 'idle') {
-            dispatch(getAllFarmersByAgent(user.token));
+        if (status === appStates.RECHARGE_SAVED) {
+            Alert.alert('Success', responseMsg, [
+                { text: "OK", onPress: () => dispatch(setIdle()) }
+            ]);
+            navigation.navigate('Dashboard');
         }
-
-        if (status === 'saving-recharge') {
-            Alert.alert("Loading ...", "Saving Recharge ...");
-        }
-
-        if (status === 'farmer-recharge-success'){
-            if (success) {
-                Alert.alert('Success', responseMsg);
-                navigation.navigate('Dashboard');
-            }else{
-                Alert.alert('Failure', responseMsg);
-            }
-        }
+        
+        if (status === appStates.FAILED){
+            Alert.alert('Failure', responseMsg);
+        }        
        
     }, [dispatch, status]);
 
@@ -74,7 +59,7 @@ export default function CardRecharge({ navigation }) {
             farmers: farmer.id,
             serial_number
         }
-        
+
         const farmerRechargeThunkArgs = {
             rechargeInfo,
             token: user.token
@@ -84,25 +69,9 @@ export default function CardRecharge({ navigation }) {
 
     return (
         <View style={{padding: 10, flex: 1}}>
-            <Text style={styles.topTitle}>Card Recharge</Text>
-            {/* <Text>Select Farmer</Text>
-                <Picker
-                    selectedValue={farmers}
-                    onValueChange={
-                        (itemValue, itemIndex) =>
-                        setSelectedFarmer(itemValue)
-                    }
-                    prompt={"Select Farmer"}
-                    >
-                        {
-                            registeredFarmers && registeredFarmers?.map(farmer => 
-                                <Picker.Item key={ farmer.id } label={ farmer.name+" "+farmer.last_name } value={ farmer.id } />
-                            )
-                        }
-                </Picker> */}
-
+            <Text style={styles.topTitle}>Card Recharge</Text>           
             {
-                (status === 'loading') ? <ActivityIndicator /> 
+                (status === appStates.LOADING) ? <ActivityIndicator /> 
                 :
                 registeredFarmers.length == 0 ? 
                 <Text style={{textAlign:'center'}}>
