@@ -25,7 +25,7 @@ export default function RegisterFarmer({ navigation }) {
     const [parish, setParish] = useState("parishfe");
     const [sub_county, setSubCounty] = useState("aijeo");
     const [district, setDistrict] = useState("disitu");
-    const [country, setCountry] = useState("ugaha");
+    const [country, setCountry] = useState("");
     const [next_of_kin_name, setNameOfNextKin] = useState("Jiuoife");
     const [next_of_kin_phone, setMobileNumberOfNextKin] = useState("242353");
     const [password, setPasswordOfFarmer] = useState("asdfasdf");

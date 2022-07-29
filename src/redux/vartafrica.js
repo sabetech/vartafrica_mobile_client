@@ -148,7 +148,7 @@ export const registerFarmerThunk = createAsyncThunk('farmer/register', async ({ 
     const requestInfo = {
       url: 'registerfarmer',
       method: 'POST',
-      body: JSON.stringify(newFarmer),
+      body: newFarmer,
       headers: {
         'Content-Type': 'application/json',
         'token': token
@@ -187,7 +187,7 @@ export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {o
     const requestInfo = {
       url: 'register',
       method: 'POST',
-      body: JSON.stringify(order),
+      body: order,
       headers: {
         'Content-Type': 'application/json',
         'token': token
@@ -237,7 +237,7 @@ export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { de
     const requestInfo = {
       url: 'debit',
       method: 'POST',
-      body: JSON.stringify(debit),
+      body: debit,
       headers: {
         'Content-Type': 'application/json',
         'token': token
@@ -250,8 +250,7 @@ export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { de
     
     const curState = getState();
     const myfarmer = curState.vartafrica.registeredFarmers.find(myfarmer => myfarmer.id == debit.user_id)
-    console.log(myfarmer)
-
+    
     const new_storage_debit = {
       id: uuidv4(),
       username: myfarmer.name,
@@ -280,7 +279,7 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
     const requestInfo = {
       url: 'recharge',
       method: 'POST',
-      body: JSON.stringify(rechargeInfo),
+      body: rechargeInfo,
       headers: {
         'Content-Type': 'application/json',
         'token': token

@@ -68,6 +68,7 @@ export default function Dashboard ({ navigation }) {
             <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
                 <TouchableOpacity
                     style={ styles.sync }
+                    onPress={() => Storage.syncAll()}
                 >
                     <Text style={ styles.syncText }>Sync</Text>
                 </TouchableOpacity>

@@ -3,14 +3,6 @@ import axios from 'axios';
 const baseUrl = 'http://vartafrica.com/api/';
 class Storage {
 
-    static saveUser(user) {
-
-    }
-
-    removeUser() {
-
-    }
-
     static async clear(){
         await AsyncStorage.clear();
     }
@@ -75,8 +67,6 @@ class Storage {
         return response;
     }
 
-
-
     static async getData(key) {
         try {
             const response = await AsyncStorage.getItem(key)
@@ -86,18 +76,23 @@ class Storage {
         }
     }
 
-    syncOne(requestInfo) {
+   static async syncOne(requestInfo) {
+    console.log("SYnc One called");
+    console.log("METHOD ", requestInfo.method);
+
         switch (requestInfo.method) {
             case 'POST':
-                makePostRequest(requestInfo)
-            break;
+                return await this.makePostRequest(requestInfo)
+            
             case 'GET':
-                makeGetRequest(requestInfo)
-            break;
+                return await this.makeGetRequest(requestInfo)
+           
         }
     }
 
     static async makePostRequest(requestInfo){
+        console.log("Make post request made ...");
+        console.log("URL: ",requestInfo.url);
         try {
             const response = await fetch(`${baseUrl}${requestInfo.url}`, {
                 method: 'POST',
@@ -105,11 +100,11 @@ class Storage {
                 body: JSON.stringify(requestInfo.body),
                 headers: {
                     'Content-Type': 'application/json',
-                    'token': token
+                    'token': requestInfo.headers.token
                 }
             });
-
-            
+            return response.json();
+   
         } catch( e ){
             console.log("Did you fail? ", e.message());
            throw new Error(e.message());
@@ -127,26 +122,47 @@ class Storage {
                     'token': requestInfo.headers.token
                 }
             });
-            return response;
+            await console.log(response.json())
+            return response.json();
         } catch ( e ) {
             throw new Error(e.message());
         }
     }
 
-    syncAll() {
+    static async syncAll() {
          //get all the keys of the storage and then try to call 
-         
-         try {
-            // const keys = await AsyncStorage.getAllKeys();
+         console.log("SYNCING IN PROGRESS...");
+        try {
+            const keys = await AsyncStorage.getAllKeys();
 
+            for(let i = 0;i < keys.length;i++) {
+                
+                console.log("GETTING ...", keys[i]);
 
+                const existingdata = await this.getData(keys[i]);
 
-          } catch(e) {
-            // read key error
-          }
-        
-        //the remote server
+                for(let j = 0;j < existingdata.length;j++) {
+                    
+                    if (existingdata[j]?.requestInfo == undefined) continue;
+
+                    const response = await this.syncOne(existingdata[j].requestInfo);
+                    await this.logResponse(response, j, existingdata[j].requestInfo);
+                }
+            }
+            console.log("SYNCING DONE!!!");
+        } catch(e) {
+            console.log("SYNCING ERROR!!!");
+            console.log("SYNCING EXECPTION ",e.message);
+        }
     }
+
+    static async logResponse(response, index, request) {
+        
+        console.log("Index=>", index, " Response:", response);
+        console.log("REQUEST=>", request);
+
+    }
+
 
 
 }

@@ -33,7 +33,6 @@
      if (loggedUser.success){
         await setUser(loggedUser);
         console.log(loggedUser);
-        Storage.saveUser(loggedUser);
         navigation.navigate('Dashboard');
      } else {
         Alert.alert("Failure", "Login Failed")
