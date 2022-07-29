@@ -2,20 +2,24 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, TextInput as Ti} from "react-native";
 import {Picker} from '@react-native-picker/picker';
 import { useDispatch, useSelector } from 'react-redux'; 
-import { TextInput } from "react-native-element-textinput";
+import { TextInput, AutoComplete } from "react-native-element-textinput";
 import { AuthContext } from "../context/AuthContext"
 import { getAllFarmersByAgent, 
          getAllRegisteredFarmers, 
          getStatus, 
          setIdle,
-         saveOrderByAgent
+         saveOrderByAgent,
+         getCrops,
+         getVarieties,
         } from '../redux/vartafrica';
+import { LogBox } from 'react-native';
+import { appStates } from "../constants";
 
 export default function FarmerOrders ({ navigation }) {
     const [selectedFarmer, setSelectedFarmer] = useState();
     const [seed_quantity, setSeedQty] = useState(["0"]);
-    const [crop_cultivated, setCropCultivated] = useState("Blesi");
-    const [variety, setVariety] = useState(["var_1"]);
+    const [crop_cultivated, setCropCultivated] = useState("Banana");
+    const [variety, setVariety] = useState(["Mpologoma"]);
     const [unit_price, setUnitPrice] = useState(["0"]);
     const [total_price, setTotalPrice] = useState(["0"]);
     const [dis_val_per_unit, setDisValPerUnit] = useState("0");
@@ -25,12 +29,15 @@ export default function FarmerOrders ({ navigation }) {
     
     const dispatch = useDispatch();
     const status = useSelector(getStatus);
+    const crops = useSelector(getCrops);
+    const variety_items = useSelector(getVarieties);
     const registeredFarmers = useSelector(getAllRegisteredFarmers);
     const { user } = useContext(AuthContext);
 
     const inputRefs = useRef([]);
     
     useEffect(() => {
+        LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
         dispatch(setIdle());
         setVarietyView((prev) => [...prev, varietyControl(prev.length)]);
     }, []);
@@ -63,16 +70,12 @@ export default function FarmerOrders ({ navigation }) {
     
     //load farmers from remote api ... or from localstore
     useEffect(() => {
-        if (status === 'idle') {
-            dispatch(getAllFarmersByAgent(user.token));
-        }
-
-        if (status === 'saving-order') {
-            Alert.alert("Loading ...", "Saving Order ...");
-        }
-
-        if (status == 'order-saved-success'){
-            Alert.alert("Success", "Order saved successfully!");
+        
+        if (status == appStates.ORDER_SAVED){
+            Alert.alert("Success", "Order saved successfully!",  [
+                
+                { text: "OK", onPress: () => dispatch(setIdle()) }
+              ]);
             navigation.navigate('Dashboard');    
         }
 
@@ -80,13 +83,23 @@ export default function FarmerOrders ({ navigation }) {
 
     useEffect(() => {
 
-        setSelectedFarmer(registeredFarmers[0]?.contact);
+        setSelectedFarmer(registeredFarmers[0]?.name+" "+registeredFarmers[0]?.last_name + "("+registeredFarmers[0]?.contact+")");
 
     },[registeredFarmers]);
 
+    const getSelectedFarmerContact = (farmerText) => {
+        let firstBracket = farmerText.indexOf("(");
+        let secondBracket = farmerText.indexOf(")");
+
+        let actualValue = farmerText.substring(firstBracket + 1, secondBracket);
+        return actualValue;
+    }
+
     const saveFarmerOrder = () => {
+        let actualSelectedFarmer = getSelectedFarmerContact(selectedFarmer);
+
         const order = {
-            farmers: selectedFarmer,
+            farmers: actualSelectedFarmer,
             seed_quantity,
             crop_cultivated,
             variety,
@@ -96,11 +109,10 @@ export default function FarmerOrders ({ navigation }) {
             net_order_value,
         }
 
-       const ui_farmer = registeredFarmers.find(farmer_search => farmer_search.id == selectedFarmer);
        const ui_info = [];
        varietyViewControls.forEach((_, i) => {
             ui_info.push({
-                name: ui_farmer.name,
+                name: selectedFarmer,
                 variety: variety[i],
                 quantity_ordered: seed_quantity[i]
             });
@@ -117,15 +129,25 @@ export default function FarmerOrders ({ navigation }) {
     const varietyControl = (key) => {
         return (
             <View style={styles.varietyControls} key={key}>
-                    <TextInput label="Variety" 
-                        style={styles.input} 
-                        inputStyle={styles.inputStyle}
-                        labelStyle={styles.labelStyle}
-                        onChangeText={(text) => handleVarietyTextChanged(text, key)} 
-                        value={ variety[key] }
-                        />
+                    <AutoComplete
+                value={variety[key]}
+                data={[...
+                    variety_items && variety_items?.map(variety_item => variety_item.name) 
+                ]}
+                style={styles.input}
+                inputStyle={styles.inputStyle}
+                labelStyle={styles.labelStyle}
+                placeholderStyle={styles.placeholderStyleAutoComplete}
+                textErrorStyle={styles.textErrorStyleAutoComplete}
+                label="Variety/Specification (Type to Search)"
+                placeholder="..."
+                placeholderTextColor="gray"
+                onChangeText={e => {
+                    handleVarietyTextChanged(e, key);
+                }}
+            /> 
                     
-                    <TextInput label="Seed Quantity" 
+                    <TextInput label="Quantity" 
                         style={styles.input} 
                         inputStyle={styles.inputStyle}
                         labelStyle={styles.labelStyle}
@@ -138,7 +160,7 @@ export default function FarmerOrders ({ navigation }) {
                         onChangeText={(text) => handleUnitPriceChanged(text, key)} value={ unit_price[key] } />
 
                     {/* ////// USING REACT NATIVE TextInput HERE DIFFERENT FROM TextInput FROM A LIBRARY /////// */}
-                    <Text>Total Price (UGX)</Text>
+                    <Text>Total Price (UGX) (quantity * price)</Text>
                     <Ti 
                         style={ styles.input } 
                         value={ total_price[key] }
@@ -195,25 +217,47 @@ export default function FarmerOrders ({ navigation }) {
             
             <ScrollView>
             <Text>Select Farmer</Text>
-                <Picker
-                    selectedValue={selectedFarmer}
-                    onValueChange={
-                        (itemValue, itemIndex) =>
-                        setSelectedFarmer(itemValue)
-                    }
-                    prompt={"Select Farmer"}
-                    >
-                        {
-                            registeredFarmers && registeredFarmers?.map(farmer => 
-                                <Picker.Item key={ farmer.id } label={ farmer.name+" "+farmer.last_name + "("+farmer.contact+")" } value={ farmer.contact } />
-                            )
-                        }
-                </Picker>
-                <TextInput label="Crop Cultivated" 
+            <AutoComplete
+                value={selectedFarmer}
+                data={[...
+                    registeredFarmers && registeredFarmers?.map(farmer => farmer.name+" "+farmer.last_name + "("+farmer.contact+")") 
+                ]}
+                style={styles.input}
+                inputStyle={styles.inputStyle}
+                labelStyle={styles.labelStyle}
+                placeholderStyle={styles.placeholderStyleAutoComplete}
+                textErrorStyle={styles.textErrorStyleAutoComplete}
+                label="Farmer (Type to Search)"
+                placeholder="..."
+                placeholderTextColor="gray"
+                onChangeText={e => {
+                    setSelectedFarmer(e);
+                }}
+            />   
+
+            <AutoComplete
+                value={crop_cultivated}
+                data={[...
+                    crops && crops?.map(crop => crop.name) 
+                ]}
+                style={styles.input}
+                inputStyle={styles.inputStyle}
+                labelStyle={styles.labelStyle}
+                placeholderStyle={styles.placeholderStyleAutoComplete}
+                textErrorStyle={styles.textErrorStyleAutoComplete}
+                label="Item (Type to Search)"
+                placeholder="..."
+                placeholderTextColor="gray"
+                onChangeText={e => {
+                    setCropCultivated(e);
+                }}
+            />  
+
+                {/* <TextInput label="Item" 
                     style={styles.input} 
                     inputStyle={styles.inputStyle}
                     labelStyle={styles.labelStyle}
-                    onChangeText={setCropCultivated} value={crop_cultivated} />
+                    onChangeText={setCropCultivated} value={crop_cultivated} /> */}
                 {
                     varietyViewControls && varietyViewControls.map(formControl => formControl)
                 }
@@ -326,6 +370,24 @@ const styles = StyleSheet.create({
     varietyText: {
         textAlign: 'center',
         color: 'white'
-    }
+    },
+    inputAutocomplete: {
+        height: 55,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        backgroundColor: 'white',
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 1,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 1.41,
+        elevation: 2,
+      },
+      inputStyleAutoComplete: { fontSize: 16 },
+      labelStyleAutoComplete: { fontSize: 14 },
+      placeholderStyleAutoComplete: { fontSize: 16 },
+      textErrorStyleAutoComplete: { fontSize: 16 },
 
 })

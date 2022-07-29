@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useIsFocused } from "@react-navigation/native";
 import DashboardCard from "../components/DashboardCard";
@@ -27,6 +27,7 @@ export default function Dashboard ({ navigation }) {
 
     useEffect(() => {
         if (status === appStates.APP_NOT_READY) {
+            Storage.clear();
             dispatch(downloadAppDataToStorage(user.token));
         } 
     }, [dispatch, status]);
@@ -72,6 +73,10 @@ export default function Dashboard ({ navigation }) {
                 </TouchableOpacity>
                 <Text style={ styles.statusStyle }>Status of Sync</Text>
             </View>
+
+            {
+                (status === appStates.LOADING) && <ActivityIndicator />
+            }
 
             <View style={styles.dashboardlist}>
                 <DashboardCard title={"Number of Registered Farmers"} value={dashboardValues?.farmer_count || 0 } />

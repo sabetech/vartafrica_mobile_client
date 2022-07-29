@@ -159,7 +159,15 @@ export const registerFarmerThunk = createAsyncThunk('farmer/register', async ({ 
       message: 'Farmer has been registered Successfully!',
       synced: false
     }
-    const response = await Storage.saveData( storageKeys.FARMERS, { newFarmer, token, requestInfo } );
+    
+    const new_storage_farmer = {
+      id: uuidv4(),
+      name: newFarmer.first_name,
+      last_name: newFarmer.last_name,
+      contact: newFarmer.mobileNumber
+    };
+
+    const response = await Storage.saveFormData( storageKeys.FARMERS, { storage_data: new_storage_farmer, requestInfo } );
     
     if (response.success) {
       const { message } = response;
@@ -220,7 +228,17 @@ export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {o
       message: 'Order has been saved successfully',
       synced: false
     }
-    const response = await Storage.saveData( storageKeys.ORDERS, { order, token, requestInfo } );
+
+    console.log(order);
+      return;
+    const new_storage_order = {
+      id: uuidv4(),
+      name: ,
+      variety: newFarmer.last_name,
+      quantity_ordered: order.seed_quantity.reduce((prev, curr, i) => prev + curr, 0),
+      net_order_value: order.net_order_value
+    };
+    const response = await Storage.saveData( storageKeys.ORDERS,  );
     
     if (response.success) {
       const { message } = response;
@@ -228,7 +246,7 @@ export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {o
         message, 
         order: {
           id: uuidv4(),
-          name: ui_info[0].ui_farmer.name,
+          name: ui_info[0].name,
           variety: ui_info[0].variety,
           quantity_ordered: ui_info[0].quantity_ordered,
           net_order_value: null,
@@ -351,9 +369,9 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
         error: null,
     },
     reducers: {
-        // setIdle: (state) => {
-        //     state.status = 'idle';
-        //   }
+        setIdle: (state) => {
+            state.status = appStates.APP_READY;
+          }
     },
     extraReducers(builder) {
         builder
@@ -396,6 +414,9 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
         .addCase(saveOrderByAgent.fulfilled, (state, action) => {
           
           state.success_msg = action.payload.message;
+          console.log(action.payload);
+          console.log(action.payload.order);
+          
           state.farmerOrders = [...state.farmerOrders, action.payload.order];
           state.dashboard_values.total_orders = state.farmerOrders.length;
 
@@ -480,6 +501,8 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
   export const getAllDeductions = (state) => state.vartafrica.deductions;
   export const getAllCardsUsed = (state) => state.vartafrica.cardsUsed;
   export const getStatus = (state) => state.vartafrica.status;
+  export const getCrops = (state) => state.vartafrica.crops;
+  export const getVarieties = (state) => state.vartafrica.varieties;
   export const getError = (state) => state.vartafrica.error;
   export const getSuccess = (state) => state.vartafrica.success;
   export const getSuccessMsg = (state) => state.vartafrica.success_msg;

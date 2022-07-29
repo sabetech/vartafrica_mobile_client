@@ -13,6 +13,7 @@ import { getAllFarmersByAgent,
     getSuccess,
     getSuccessMsg
    } from '../redux/vartafrica';
+import { appStates } from "../constants";
 
 
 export default function CardRecharge({ navigation }) {
@@ -81,25 +82,9 @@ export default function CardRecharge({ navigation }) {
 
     return (
         <View style={{padding: 10, flex: 1}}>
-            <Text style={styles.topTitle}>Card Recharge</Text>
-            {/* <Text>Select Farmer</Text>
-                <Picker
-                    selectedValue={farmers}
-                    onValueChange={
-                        (itemValue, itemIndex) =>
-                        setSelectedFarmer(itemValue)
-                    }
-                    prompt={"Select Farmer"}
-                    >
-                        {
-                            registeredFarmers && registeredFarmers?.map(farmer => 
-                                <Picker.Item key={ farmer.id } label={ farmer.name+" "+farmer.last_name } value={ farmer.id } />
-                            )
-                        }
-                </Picker> */}
-
+            <Text style={styles.topTitle}>Card Recharge</Text>           
             {
-                (status === 'loading') ? <ActivityIndicator /> 
+                (status === appStates.LOADING) ? <ActivityIndicator /> 
                 :
                 registeredFarmers.length == 0 ? 
                 <Text style={{textAlign:'center'}}>

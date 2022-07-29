@@ -11,31 +11,48 @@ class Storage {
 
     }
 
+    static async clear(){
+        await AsyncStorage.clear();
+    }
+
     static async saveData(key, data) {
-        
         try{
-            const existingData = await getData(key);
+            const existingData = await this.getData(key);
+            
             if (existingData === null) {
-                await AsyncStorage.setItem(key, JSON.stringify([data]));
+                await AsyncStorage.setItem(key, JSON.stringify([...data]));
             }
-            else {
-                await AsyncStorage.setItem(key, JSON.stringify([...existingData, data]));
-            }
-
-            const response = {
-                success: true,
-                message: data.requestInfo.message
-            }
-            return response;
+            
         }catch(e) {
-
+            console.log(e.message);
         }
+    }
+
+    static async saveFormData(key, formRequestData) {
+       const existingData = await this.getData(key);
+       const {storage_data, requestInfo} = formRequestData;
+
+       const _storevalue = {
+        ...storage_data, requestInfo
+       }
+
+        if (existingData === null) {
+            
+        } else{
+            await AsyncStorage.setItem(key, JSON.stringify([...existingData, _storevalue]));
+        }
+        
+        const response = {
+            success: true,
+            message: data.requestInfo.message
+        }
+        return response;
     }
 
     static async getData(key) {
         try {
             const response = await AsyncStorage.getItem(key)
-            return response != null ? JSON.parse(jsonValue) : null
+            return response != null ? JSON.parse(response) : null
         }catch ( e ) {
             return new Error (e.message)
         }
@@ -90,7 +107,16 @@ class Storage {
 
     syncAll() {
          //get all the keys of the storage and then try to call 
+         
+         try {
+            // const keys = await AsyncStorage.getAllKeys();
 
+
+
+          } catch(e) {
+            // read key error
+          }
+        
         //the remote server
     }
 
