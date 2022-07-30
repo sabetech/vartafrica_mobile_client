@@ -7,10 +7,7 @@ export const storageKeys = {
     COUNTRY_LIST: '@COUNTRY_LIST',
     SUB_COUNTIES: '@SUB_COUNTIES',
     CROPS: '@CROPS',
-    VARIETIES: '@VARIETIES',
-    DEBITS: '@DEBITS',
-    RECHARGE: '@RECHARGES'
-
+    VARIETIES: '@VARIETIES'
 }
 
 export const appStates = {
@@ -22,6 +19,7 @@ export const appStates = {
     FARMER_SAVED:'register-farmer-success',
     ORDER_SAVED: 'order-saved-success',
     DEBIT_SAVED: 'farmer-debit-success',
+    DEBIT_FAILED: 'farmer-debit-failed',
     RECHARGE_SAVED: 'farmer-recharge-success',
     RECHARGE_SAVING: 'app-recharge-saving',
     SYNCING: 'app-syncing',

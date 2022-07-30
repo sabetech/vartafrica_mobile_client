@@ -7,7 +7,8 @@ import {
   getListOfDeductions,
   getUsedCardsByAgent,
   getListOfvariety,
-  getListOfCrops
+  getListOfCrops,
+  saveFarmerDebitAPI
 } from '../services/api'
 import Storage from '../services/storage';
 import { uuidv4 } from '../utils';
@@ -230,19 +231,8 @@ export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {o
   }
 });
 
-export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { debit, token}, { getState } ) => {
+export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { debit, token}, { getState, rejectWithValue } ) => {
   try {
-    const requestInfo = {
-      url: 'debit',
-      method: 'POST',
-      body: debit,
-      headers: {
-        'Content-Type': 'application/json',
-        'token': token
-      },
-      message: 'Debit has been saved successfully',
-      synced: false
-    }
     
     const curState = getState();
     const myfarmer = curState.vartafrica.registeredFarmers.find(myfarmer => myfarmer.id == debit.user_id)
@@ -253,8 +243,7 @@ export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { de
       amount: debit.amount
     }
 
-    const response = await Storage.saveFormData( storageKeys.DEBITS, { storage_data: new_storage_debit, requestInfo } );
-    
+    const response = await saveFarmerDebitAPI(debit, token);
     if (response.success) {
       const { message } = response;
       return {
@@ -263,10 +252,11 @@ export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { de
           ...new_storage_debit
         }
       };
+    }else{
+      return rejectWithValue(response.message)
     }
-
   }catch ( err ) {
-    return err.message;
+    return rejectWithValue(err.message)
   }
 });
 
@@ -416,7 +406,9 @@ export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async
           state.status = appStates.DEBIT_SAVED;
         })
         .addCase(saveFarmerDebit.rejected, (state, action) => {
-          state.status = 'failed';
+          state.status = appStates.DEBIT_FAILED;
+          console.log(action.error);
+          console.log(action.payload);
           state.error = action.error.message;
         })
         .addCase(recharge.pending, (state) => {

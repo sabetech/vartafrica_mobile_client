@@ -35,7 +35,6 @@ export default function Dashboard ({ navigation }) {
     }, [dispatch, status]);
 
     const logout = () => {
-        Storage.removeUser();
         setUser(null);
     }
 

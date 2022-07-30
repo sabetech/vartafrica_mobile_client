@@ -3,16 +3,15 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useDispatch, useSelector } from 'react-redux'; 
 import { TextInput, AutoComplete } from "react-native-element-textinput";
 import { AuthContext } from "../context/AuthContext"
-import { syncParticularKey, 
+import { 
     getAllRegisteredFarmers, 
     getStatus, 
     setIdle,
     saveFarmerDebit,
-    getSuccess,
-    getSuccessMsg
+    getSuccessMsg,
+    getError
    } from '../redux/vartafrica';
 import { appStates } from "../constants";
-import { storageKeys } from "../constants";
 
 
 export default function NewFarmerDebit({ navigation }) {
@@ -21,11 +20,11 @@ export default function NewFarmerDebit({ navigation }) {
 
     const registeredFarmers = useSelector(getAllRegisteredFarmers);
     const status = useSelector(getStatus);
-    const success = useSelector(getSuccess);
+    const errormsg = useSelector(getError);
     const responseMsg = useSelector(getSuccessMsg);
     const { user } = useContext(AuthContext);
     
-    dispatch = useDispatch();
+    const dispatch = useDispatch();
 
     useEffect(() => {
 
@@ -40,12 +39,14 @@ export default function NewFarmerDebit({ navigation }) {
             Alert.alert('Success', responseMsg,  [
                 { text: "OK", onPress: () => {
                     dispatch(setIdle())
-                    dispatch(syncParticularKey(storageKeys.FARMERS));
-                    dispatch(syncParticularKey(storageKeys.DEBITS));
                 } }
               ]);
             navigation.navigate('Dashboard');
            
+        }
+
+        if (status === appStates.DEBIT_FAILED) {
+            Alert.alert('Failure', errormsg);
         }
        
     }, [dispatch, status]);

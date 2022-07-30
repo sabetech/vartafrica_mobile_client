@@ -42,12 +42,17 @@ export default function RegisterFarmer({ navigation }) {
     useEffect(() => {
         LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
         let isSubscribed = true;
-        getCurrentPosition((result) => {
-            if (isSubscribed) {
-                setLongitude(result.position.coords.longitude);
-                setLatitude(result.position.coords.latitude);
-            }            
-        });
+        try{
+            getCurrentPosition((result) => {
+                if (isSubscribed) {
+                    setLongitude(result?.position.coords.longitude);
+                    setLatitude(result?.position.coords.latitude);
+                }            
+            });
+        }catch( e ) {
+            Alert.alert("Warning", "Could not get location");
+        }
+        
         return (() => {
             isSubscribed = false;
         });

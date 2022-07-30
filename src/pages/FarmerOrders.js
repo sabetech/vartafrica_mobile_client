@@ -163,7 +163,7 @@ export default function FarmerOrders ({ navigation }) {
                         onChangeText={(text) => handleUnitPriceChanged(text, key)} value={ unit_price[key] } />
 
                     {/* ////// USING REACT NATIVE TextInput HERE DIFFERENT FROM TextInput FROM A LIBRARY /////// */}
-                    <Text>Total Price (UGX) (quantity * price)</Text>
+                    <Text>Total Amount (UGX) (quantity * price)</Text>
                     <Ti 
                         style={ styles.input } 
                         value={ total_price[key] }
