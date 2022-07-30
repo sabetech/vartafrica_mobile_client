@@ -195,8 +195,6 @@ export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {o
       message: 'Order has been saved successfully',
       synced: false
     }
-
-    console.log(order);
       
     const curState = getState();
     const myfarmer = curState.vartafrica.registeredFarmers.find(_myfarmer => _myfarmer.contact == order.farmers);
@@ -245,8 +243,6 @@ export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { de
       message: 'Debit has been saved successfully',
       synced: false
     }
-    
-    console.log(debit)
     
     const curState = getState();
     const myfarmer = curState.vartafrica.registeredFarmers.find(myfarmer => myfarmer.id == debit.user_id)
@@ -315,6 +311,24 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
   }
 });
 
+export const syncAll = createAsyncThunk('app/syncAll', async (_, { rejectWithValue }) => {
+  try{
+    const response = await Storage.syncAll();
+    return response;
+  }catch(e){
+    return rejectWithValue(e.message());
+  }
+});
+
+export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async (key, { rejectWithValue }) => {
+  try{
+    const response = await Storage.syncParticularData(key);
+    return response;
+  }catch(e){
+    return rejectWithValue(e.message());
+  }
+});
+
   export const varfAfricaSlice = createSlice({
     name: 'vart_africa_slice',
     initialState: {
@@ -326,6 +340,8 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
         crops: [],
         varieties: [],
         status: appStates.APP_NOT_READY,
+        sync_state: appStates.SYNCING_IDLE,
+        sync_success: true,
         success: false,
         success_msg: '',
         error: null,
@@ -365,6 +381,7 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
           state.dashboard_values.farmer_count = state.registeredFarmers.length;
 
           state.status = appStates.FARMER_SAVED;
+          
         })
         .addCase(registerFarmerThunk.rejected, (state, action) => {
           state.status = 'failed';
@@ -395,7 +412,7 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
           state.deductions = [...state.deductions, action.payload.debit];
           state.dashboard_values.total_deductions = state.dashboard_values.total_deductions + 1 
 
-          // verify: state.dashboard_values.
+          
           state.status = appStates.DEBIT_SAVED;
         })
         .addCase(saveFarmerDebit.rejected, (state, action) => {
@@ -417,6 +434,30 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
           state.status = 'failed';
           state.error = action.error.message;
         })
+        .addCase(syncAll.pending, (state) => {
+          state.sync_state = appStates.SYNCING;
+        })
+        .addCase(syncAll.fulfilled, (state, action) => {
+          state.sync_state = appStates.APP_READY;
+          state.sync_success = action.payload.success;
+        })
+        .addCase(syncAll.rejected, (state, action) => {
+          state.sync_state = appStates.SYNCING_ERROR;
+          state.sync_success = false;
+          state.error = action.error.message;
+        })
+        .addCase(syncParticularKey.pending, (state) => {
+          state.sync_state = appStates.SYNCING;
+        })
+        .addCase(syncParticularKey.fulfilled, (state, action) => {
+          state.sync_state = appStates.APP_READY;
+          state.sync_success = action.payload.success;
+        })
+        .addCase(syncParticularKey.rejected, (state, action) => {
+          state.sync_state = appStates.SYNCING_ERROR;
+          state.sync_success = false;
+          state.error = action.error.message;
+        })
     }
   });
 
@@ -432,5 +473,7 @@ export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rech
   export const getError = (state) => state.vartafrica.error;
   export const getSuccess = (state) => state.vartafrica.success;
   export const getSuccessMsg = (state) => state.vartafrica.success_msg;
+  export const getSyncState = (state) =>state.vartafrica.sync_state;
+  export const getSyncSuccess = (state) =>state.vartafrica.sync_success;
 
   export default varfAfricaSlice.reducer;

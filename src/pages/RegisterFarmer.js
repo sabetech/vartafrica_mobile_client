@@ -4,11 +4,12 @@ import { TextInput, AutoComplete } from 'react-native-element-textinput';
 import Geolocation from 'react-native-geolocation-service';
 import { AuthContext } from "../context/AuthContext";
 import { useDispatch, useSelector } from 'react-redux';
-import { registerFarmerThunk, getStatus, setIdle } from '../redux/vartafrica';
+import { registerFarmerThunk, getStatus, setIdle, syncParticularKey } from '../redux/vartafrica';
 import { Picker } from '@react-native-picker/picker';
 import { PermissionsAndroid } from 'react-native';
-import { appStates } from "../constants";
+import { appStates, storageKeys } from "../constants";
 import { countries } from "../resources/countries";
+import { sub_counties } from "../resources/sub_counties";
 import { LogBox } from 'react-native';
 
 
@@ -58,8 +59,14 @@ export default function RegisterFarmer({ navigation }) {
         if (status == appStates.FARMER_SAVED){
             Alert.alert("Success", "Farmer Registered Successfully", [
                 
-                { text: "OK", onPress: () => dispatch(setIdle()) }
+                { 
+                    text: "OK", onPress: () => {
+                    dispatch(setIdle());
+                    dispatch(syncParticularKey(storageKeys.FARMERS));
+                } 
+            }
               ]);
+            
             navigation.goBack();
         }
         
@@ -210,25 +217,39 @@ export default function RegisterFarmer({ navigation }) {
         <Picker.Item label="Female" value="female" />
         </Picker>
 
-        <TextInput style={styles.input} 
+            <TextInput style={styles.input} 
             inputStyle={styles.inputStyle}
             labelStyle={styles.labelStyle}
             onChangeText={(text) => setAge(text)} value={age} placeholder="29" label="Age" />
 
-        <TextInput style={styles.input} 
-            inputStyle={styles.inputStyle}
-            labelStyle={styles.labelStyle}
-            onChangeText={(text) => setVillage(text)} value={village} placeholder="Village" label="Village" />
+            <TextInput style={styles.input} 
+                inputStyle={styles.inputStyle}
+                labelStyle={styles.labelStyle}
+                onChangeText={(text) => setVillage(text)} value={village} placeholder="Village" label="Village" />
             
             <TextInput style={styles.input} 
-            inputStyle={styles.inputStyle}
-            labelStyle={styles.labelStyle}
-            onChangeText={(text) => setParish(text)} value={parish} placeholder="Parish ..." label="Parish" />
-
-        <TextInput style={styles.input} 
-            inputStyle={styles.inputStyle}
-            labelStyle={styles.labelStyle}
-            onChangeText={(text) => setSubCounty(text)} value={sub_county} placeholder="Sub County ..." label="Sub County" />
+                inputStyle={styles.inputStyle}
+                labelStyle={styles.labelStyle}
+                onChangeText={(text) => setParish(text)} value={parish} placeholder="Parish ..." label="Parish" />
+            
+            <AutoComplete
+                value={sub_county}
+                data={[...
+                    sub_counties && sub_counties?.map(
+                        subcounty => subcounty.name
+                    )]}
+                style={styles.input}
+                inputStyle={styles.inputStyle}
+                labelStyle={styles.labelStyle}
+                placeholderStyle={styles.placeholderStyleAutoComplete}
+                textErrorStyle={styles.textErrorStyleAutoComplete}
+                label="Sub County (Type to Search)"
+                placeholder="sub country..."
+                placeholderTextColor="gray"
+                onChangeText={e => {
+                    setSubCounty(e);
+                }}
+            /> 
 
         <TextInput style={styles.input} 
             inputStyle={styles.inputStyle}

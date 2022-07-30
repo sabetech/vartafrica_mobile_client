@@ -15,13 +15,15 @@ const styles = StyleSheet.create({
     cardStyle : {
         width: '40%',
         height: 120,
-        borderWidth: 1,
+        elevation: 3,
         marginHorizontal: 5,
         marginVertical: 10,
         borderRadius: 10,
         flexDirection: 'column',        
         justifyContent: 'center',
-        alignContent: 'center'
+        alignContent: 'center',
+        backgroundColor: 'white'
+
     },
     titleText: {
         textAlign: 'center',

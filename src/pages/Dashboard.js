@@ -5,7 +5,7 @@ import { useIsFocused } from "@react-navigation/native";
 import DashboardCard from "../components/DashboardCard";
 import { FloatingAction } from "react-native-floating-action";
 import { AuthContext } from "../context/AuthContext";
-import { downloadAppDataToStorage, getAllDashboardValues, getStatus, setIdle, varfAfricaSlice } from '../redux/vartafrica';
+import { downloadAppDataToStorage, getAllDashboardValues, getStatus, getSyncState, getSyncSuccess } from '../redux/vartafrica';
 import MainMenuItem from "../components/MainMenuButton";
 import Storage from "../services/storage";
 import { appStates } from "../constants";
@@ -14,7 +14,9 @@ import { appStates } from "../constants";
 
 export default function Dashboard ({ navigation }) {
     const dashboardValues = useSelector(getAllDashboardValues);
+    const sync_state = useSelector(getSyncState); 
     const status = useSelector(getStatus);
+    const sync_success = useSelector(getSyncSuccess);
     const dispatch = useDispatch();
     const { user, setUser } = useContext(AuthContext);
     const isFocused = useIsFocused();
@@ -67,12 +69,17 @@ export default function Dashboard ({ navigation }) {
         <View style={{padding: 10, flex: 1}}>
             <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
                 <TouchableOpacity
-                    style={ styles.sync }
+                    style={{...styles.sync, backgroundColor: (sync_success ? 'green':'red')} }
                     onPress={() => Storage.syncAll()}
                 >
-                    <Text style={ styles.syncText }>Sync</Text>
-                </TouchableOpacity>
-                <Text style={ styles.statusStyle }>Status of Sync</Text>
+                    {
+                        ( sync_state == appStates.SYNCING ) ? <ActivityIndicator color={'white'} size={'large'}/> : <Text style={styles.syncText}>Sync</Text>
+                    } 
+                </TouchableOpacity><Text>
+                    {                        
+                        (sync_state == appStates.SYNCING) ? "Syncing ..." : sync_success ? "Synced" : "Sync Failed! Get a Better Network"
+                    }
+                    </Text>
             </View>
 
             {
@@ -159,8 +166,7 @@ const styles = StyleSheet.create({
     },
     sync: {
         width: '30%',
-        height: 30,
-        backgroundColor: 'green',
+        height: 40,
         borderRadius: 10,
         marginRight: 10        
     },
@@ -168,7 +174,7 @@ const styles = StyleSheet.create({
         color: 'white',
         padding: 5,
         textAlign: 'center',
-        
+        fontSize: 20
     },
     statusStyle: {
         textAlign: 'center'

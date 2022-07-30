@@ -23,5 +23,9 @@ export const appStates = {
     ORDER_SAVED: 'order-saved-success',
     DEBIT_SAVED: 'farmer-debit-success',
     RECHARGE_SAVED: 'farmer-recharge-success',
-    RECHARGE_SAVING: 'app-recharge-saving'
+    RECHARGE_SAVING: 'app-recharge-saving',
+    SYNCING: 'app-syncing',
+    SYNCING_COMPLETE: 'app-syncing-complete',
+    SYNCING_IDLE: 'app-syncing-idle',
+    SYNCING_ERROR: 'app-syncing-error'
 }

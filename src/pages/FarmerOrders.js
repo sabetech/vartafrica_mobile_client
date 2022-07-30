@@ -1,19 +1,19 @@
 import React, { useEffect, useState, useContext, useRef } from "react";
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, TextInput as Ti} from "react-native";
-import {Picker} from '@react-native-picker/picker';
 import { useDispatch, useSelector } from 'react-redux'; 
 import { TextInput, AutoComplete } from "react-native-element-textinput";
 import { AuthContext } from "../context/AuthContext"
-import { getAllFarmersByAgent, 
-         getAllRegisteredFarmers, 
+import { getAllRegisteredFarmers, 
          getStatus, 
          setIdle,
          saveOrderByAgent,
          getCrops,
          getVarieties,
+         syncParticularKey
         } from '../redux/vartafrica';
 import { LogBox } from 'react-native';
 import { appStates } from "../constants";
+import { storageKeys } from "../constants";
 
 export default function FarmerOrders ({ navigation }) {
     const [selectedFarmer, setSelectedFarmer] = useState();
@@ -25,7 +25,6 @@ export default function FarmerOrders ({ navigation }) {
     const [dis_val_per_unit, setDisValPerUnit] = useState("0");
     const [net_order_value, setnetOrderValue] = useState(0);
     const [varietyViewControls, setVarietyView] = useState([]);
-    const [elRefs, setElRefs] = useState([]);
     
     const dispatch = useDispatch();
     const status = useSelector(getStatus);
@@ -74,7 +73,11 @@ export default function FarmerOrders ({ navigation }) {
         if (status == appStates.ORDER_SAVED){
             Alert.alert("Success", "Order saved successfully!",  [
                 
-                { text: "OK", onPress: () => dispatch(setIdle()) }
+                { text: "OK", onPress: () => {
+                    dispatch(setIdle())
+                    dispatch(syncParticularKey(storageKeys.FARMERS));
+                    dispatch(syncParticularKey(storageKeys.ORDERS));
+                } }
               ]);
             navigation.navigate('Dashboard');    
         }

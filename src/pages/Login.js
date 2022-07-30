@@ -21,6 +21,10 @@
 
     useEffect(() => {
         if (user != null) navigation.navigate('Dashboard');
+
+        return (() =>{
+
+        });
     });
 
  const signIn = async () => {
@@ -33,12 +37,15 @@
      if (loggedUser.success){
         await setUser(loggedUser);
         console.log(loggedUser);
+        setLoading(false);
         navigation.navigate('Dashboard');
      } else {
         Alert.alert("Failure", "Login Failed")
      }
+     
     }catch( e ) {
-        Alert.alert("Failure", "No internet!")
+        Alert.alert("Failure", "Network issue!")
+        setLoading(false);
     }
      
  }

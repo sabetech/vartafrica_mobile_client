@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { appStates, storageKeys } from '../constants';
 const baseUrl = 'http://vartafrica.com/api/';
 class Storage {
 
@@ -16,7 +17,7 @@ class Storage {
             }
             
         }catch(e) {
-            console.log(e.message);
+            console.log(e.message());
         }
     }
 
@@ -72,27 +73,42 @@ class Storage {
             const response = await AsyncStorage.getItem(key)
             return response != null ? JSON.parse(response) : null
         }catch ( e ) {
-            return new Error (e.message)
+            return new Error (e.message())
         }
     }
 
    static async syncOne(requestInfo) {
-    console.log("SYnc One called");
-    console.log("METHOD ", requestInfo.method);
+        try{
+            switch (requestInfo.method) {
+                case 'POST':
+                    const post_req_reponse = await this.makePostRequest(requestInfo)
+                    return post_req_reponse;
+                case 'GET':
+                    const get_req_response = await this.makeGetRequest(requestInfo)
+                    return get_req_response;
+            }
+        }catch( e ){
+            throw new Error( e.message() )
+        }
+    }
 
-        switch (requestInfo.method) {
-            case 'POST':
-                return await this.makePostRequest(requestInfo)
-            
-            case 'GET':
-                return await this.makeGetRequest(requestInfo)
-           
+    static async syncParticularData(key){
+        const existingdata = await this.getData(key);
+
+        try{
+            for(let j = 0;j < existingdata.length;j++) {
+                
+                if (existingdata[j]?.requestInfo == undefined) continue;
+
+                const response = await this.syncOne(existingdata[j].requestInfo);
+                await this.syncCleanUp(key, j, response);
+            }
+        }catch( e ){
+            throw new Error(e.message())
         }
     }
 
     static async makePostRequest(requestInfo){
-        console.log("Make post request made ...");
-        console.log("URL: ",requestInfo.url);
         try {
             const response = await fetch(`${baseUrl}${requestInfo.url}`, {
                 method: 'POST',
@@ -106,7 +122,6 @@ class Storage {
             return response.json();
    
         } catch( e ){
-            console.log("Did you fail? ", e.message());
            throw new Error(e.message());
         }
     }
@@ -122,7 +137,6 @@ class Storage {
                     'token': requestInfo.headers.token
                 }
             });
-            await console.log(response.json())
             return response.json();
         } catch ( e ) {
             throw new Error(e.message());
@@ -132,6 +146,7 @@ class Storage {
     static async syncAll() {
          //get all the keys of the storage and then try to call 
          console.log("SYNCING IN PROGRESS...");
+         await this.syncParticularData(storageKeys.FARMERS);
         try {
             const keys = await AsyncStorage.getAllKeys();
 
@@ -143,16 +158,21 @@ class Storage {
 
                 for(let j = 0;j < existingdata.length;j++) {
                     
-                    if (existingdata[j]?.requestInfo == undefined) continue;
+                    if (existingdata[j]?.requestInfo == undefined) {
+                        continue;
+                    }
 
                     const response = await this.syncOne(existingdata[j].requestInfo);
-                    await this.logResponse(response, j, existingdata[j].requestInfo);
+                    await this.syncCleanUp(keys[i], j, response);
                 }
+                console.log("DONE WITH->", keys[i]);
             }
-            console.log("SYNCING DONE!!!");
+            const check = await this.checkIfSyncedAll();
+            return {
+                success: check
+            }
         } catch(e) {
-            console.log("SYNCING ERROR!!!");
-            console.log("SYNCING EXECPTION ",e.message);
+            throw new Error(e.message());
         }
     }
 
@@ -161,6 +181,34 @@ class Storage {
         console.log("Index=>", index, " Response:", response);
         console.log("REQUEST=>", request);
 
+    }
+
+    static async syncCleanUp(key, index, response) {
+        const existingdata = await this.getData(key);
+        if (response.success){
+            delete existingdata[index]['requestInfo'];
+            await AsyncStorage.setItem(key, JSON.stringify(existingdata));
+        }
+    }
+
+    static async checkIfSyncedAll(){
+        try {
+            const keys = await AsyncStorage.getAllKeys();
+
+            for(let i = 0;i < keys.length;i++) {
+                console.log("CHECKING IF SYNCED...", keys[i]);
+                const existingdata = await this.getData(keys[i]);
+
+                for(let j = 0;j < existingdata.length;j++) {
+                    if (existingdata[j]?.requestInfo == undefined) continue;
+                    return false;
+                }
+                console.log("SYNCED: ", keys[i]);
+            }
+            return true;
+        }catch(e){
+            return false;
+        }
     }
 
 

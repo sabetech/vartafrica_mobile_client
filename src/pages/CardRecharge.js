@@ -3,9 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } fr
 import { useDispatch, useSelector } from 'react-redux'; 
 import { TextInput } from "react-native-element-textinput";
 import { AutoComplete } from 'react-native-element-textinput';
-import { useIsFocused } from "@react-navigation/native";
 import { AuthContext } from "../context/AuthContext"
-import { getAllFarmersByAgent, 
+import { syncParticularKey, 
     getAllRegisteredFarmers, 
     recharge,
     getStatus,
@@ -13,6 +12,7 @@ import { getAllFarmersByAgent,
     getSuccessMsg
    } from '../redux/vartafrica';
 import { appStates } from "../constants";
+import { storageKeys } from "../constants";
 
 
 export default function CardRecharge({ navigation }) {
@@ -36,7 +36,11 @@ export default function CardRecharge({ navigation }) {
     useEffect(() => {
         if (status === appStates.RECHARGE_SAVED) {
             Alert.alert('Success', responseMsg, [
-                { text: "OK", onPress: () => dispatch(setIdle()) }
+                { text: "OK", onPress: () => {
+                    dispatch(setIdle())
+                    dispatch(syncParticularKey(storageKeys.FARMERS));
+                    dispatch(syncParticularKey(storageKeys.RECHARGE));
+                } }
             ]);
             navigation.navigate('Dashboard');
         }

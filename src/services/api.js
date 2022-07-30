@@ -33,7 +33,6 @@ export const registerFarmer = async (newFarmer, token) => {
         });
         return response.json();
     } catch( e ){
-        console.log("Did you fail? ", e.message());
        throw new Error(e.message());
     }
 }

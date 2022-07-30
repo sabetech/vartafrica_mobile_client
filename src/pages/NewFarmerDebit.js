@@ -2,10 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useDispatch, useSelector } from 'react-redux'; 
 import { TextInput, AutoComplete } from "react-native-element-textinput";
-import { useIsFocused } from "@react-navigation/native";
-import {Picker} from '@react-native-picker/picker';
 import { AuthContext } from "../context/AuthContext"
-import { getAllFarmersByAgent, 
+import { syncParticularKey, 
     getAllRegisteredFarmers, 
     getStatus, 
     setIdle,
@@ -14,6 +12,7 @@ import { getAllFarmersByAgent,
     getSuccessMsg
    } from '../redux/vartafrica';
 import { appStates } from "../constants";
+import { storageKeys } from "../constants";
 
 
 export default function NewFarmerDebit({ navigation }) {
@@ -39,7 +38,11 @@ export default function NewFarmerDebit({ navigation }) {
         if (status === appStates.DEBIT_SAVED){
 
             Alert.alert('Success', responseMsg,  [
-                { text: "OK", onPress: () => dispatch(setIdle()) }
+                { text: "OK", onPress: () => {
+                    dispatch(setIdle())
+                    dispatch(syncParticularKey(storageKeys.FARMERS));
+                    dispatch(syncParticularKey(storageKeys.DEBITS));
+                } }
               ]);
             navigation.navigate('Dashboard');
            
