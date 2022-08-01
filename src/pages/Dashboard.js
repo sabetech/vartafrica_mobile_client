@@ -5,7 +5,7 @@ import { useIsFocused } from "@react-navigation/native";
 import DashboardCard from "../components/DashboardCard";
 import { FloatingAction } from "react-native-floating-action";
 import { AuthContext } from "../context/AuthContext";
-import { downloadAppDataToStorage, getAllDashboardValues, getStatus, getSyncState, getSyncSuccess } from '../redux/vartafrica';
+import { downloadAppDataToStorage, getAllDashboardValues, getStatus, getSyncState, getSyncSuccess, setAppNotReady } from '../redux/vartafrica';
 import MainMenuItem from "../components/MainMenuButton";
 import Storage from "../services/storage";
 import { appStates } from "../constants";
@@ -30,6 +30,7 @@ export default function Dashboard ({ navigation }) {
 
     const logout = () => {
         setUser(null);
+        dispatch(setAppNotReady());
     }
 
     const actions = [

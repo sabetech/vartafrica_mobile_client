@@ -346,7 +346,12 @@ export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async
     reducers: {
         setIdle: (state) => {
             state.status = appStates.APP_READY;
-          }
+          },
+        setAppNotReady: (state) => {
+          state.status = appStates.APP_NOT_READY;
+          state.sync_success = true;
+          state.sync_state = appStates.SYNCING_IDLE;
+        }
     },
     extraReducers(builder) {
         builder
@@ -468,7 +473,7 @@ export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async
     }
   });
 
-  export const { setIdle } = varfAfricaSlice.actions;
+  export const { setIdle, setAppNotReady } = varfAfricaSlice.actions;
   export const getAllDashboardValues = (state) => state.vartafrica.dashboard_values;
   export const getAllRegisteredFarmers = (state) => state.vartafrica.registeredFarmers;
   export const getAllFarmerOrders = (state) => state.vartafrica.farmerOrders;

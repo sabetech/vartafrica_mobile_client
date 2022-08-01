@@ -10,6 +10,7 @@ import { PermissionsAndroid } from 'react-native';
 import { appStates, storageKeys } from "../constants";
 import { countries } from "../resources/countries";
 import { sub_counties } from "../resources/sub_counties";
+import { districts } from "../resources/districts";
 import { LogBox } from 'react-native';
 
 
@@ -30,8 +31,8 @@ export default function RegisterFarmer({ navigation }) {
     const [next_of_kin_name, setNameOfNextKin] = useState("next_of_kin");
     const [next_of_kin_phone, setMobileNumberOfNextKin] = useState("242353");
     const [password, setPasswordOfFarmer] = useState("asdfasdf");
-    const [latitude, setLatitude] = useState("loading ...");
-    const [longitude, setLongitude] = useState("loading ...");
+    const [latitude, setLatitude] = useState("0");
+    const [longitude, setLongitude] = useState("0");
     const [disability_status, setDisabilityStatus] = useState("no");
     const [land_area, setLandarea] = useState("123");
     const [mechanization_needed, setMechanizationNeeded] = useState("yes");
@@ -256,10 +257,24 @@ export default function RegisterFarmer({ navigation }) {
                 }}
             /> 
 
-        <TextInput style={styles.input} 
+        <AutoComplete
+            value={district}
+            data={[...
+                districts && districts?.map(
+                    dists => dists.name
+                )]}
+            style={styles.input}
             inputStyle={styles.inputStyle}
             labelStyle={styles.labelStyle}
-            onChangeText={(text) => setDistrict(text)} value={district} placeholder="District ..." label="District" />
+            placeholderStyle={styles.placeholderStyleAutoComplete}
+            textErrorStyle={styles.textErrorStyleAutoComplete}
+            label="Districts (Type to Search)"
+            placeholder=""
+            placeholderTextColor="gray"
+            onChangeText={e => {
+                setDistrict(e);
+            }}
+        />
 
         <AutoComplete
                 value={country}
