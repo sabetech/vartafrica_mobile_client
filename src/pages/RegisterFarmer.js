@@ -15,19 +15,19 @@ import { LogBox } from 'react-native';
 
 export default function RegisterFarmer({ navigation }) {
     const { user } = useContext(AuthContext);
-    const [first_name, setFirstname] = useState("sample");
-    const [last_name, setLastname] = useState("test here");
-    const [user_name, setUsername] = useState("jiaofe_5");
-    const [country_code, setCountryCode] = useState("");
-    const [mobileNumber, setMobileNumber] = useState("89437433");
+    const [first_name, setFirstname] = useState("ab");
+    const [last_name, setLastname] = useState("cd");
+    const [user_name, setUsername] = useState("ef");
+    const [country_code, setCountryCode] = useState("93");
+    const [mobileNumber, setMobileNumber] = useState("1234");
     const [age, setAge] = useState("24");
     const [sex, setSex] = useState("male");
-    const [village, setVillage] = useState("amanfj");
-    const [parish, setParish] = useState("parishfe");
-    const [sub_county, setSubCounty] = useState("aijeo");
-    const [district, setDistrict] = useState("disitu");
-    const [country, setCountry] = useState("");
-    const [next_of_kin_name, setNameOfNextKin] = useState("Jiuoife");
+    const [village, setVillage] = useState("vao");
+    const [parish, setParish] = useState("par");
+    const [sub_county, setSubCounty] = useState("ab");
+    const [district, setDistrict] = useState("bb");
+    const [country, setCountry] = useState("Uganda");
+    const [next_of_kin_name, setNameOfNextKin] = useState("next_of_kin");
     const [next_of_kin_phone, setMobileNumberOfNextKin] = useState("242353");
     const [password, setPasswordOfFarmer] = useState("asdfasdf");
     const [latitude, setLatitude] = useState("loading ...");
@@ -35,7 +35,7 @@ export default function RegisterFarmer({ navigation }) {
     const [disability_status, setDisabilityStatus] = useState("no");
     const [land_area, setLandarea] = useState("123");
     const [mechanization_needed, setMechanizationNeeded] = useState("yes");
-    const [fertilizer, setFertilizer] = useState("affe");
+    const [fertilizer, setFertilizer] = useState("yes");
     const dispatch = useDispatch();
     const status = useSelector(getStatus);
 
@@ -45,8 +45,8 @@ export default function RegisterFarmer({ navigation }) {
         try{
             getCurrentPosition((result) => {
                 if (isSubscribed) {
-                    setLongitude(result?.position.coords.longitude);
-                    setLatitude(result?.position.coords.latitude);
+                    setLongitude(result?.position?.coords.longitude);
+                    setLatitude(result?.position?.coords.latitude);
                 }            
             });
         }catch( e ) {

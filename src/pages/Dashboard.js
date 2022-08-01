@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useIsFocused } from "@react-navigation/native";
 import DashboardCard from "../components/DashboardCard";
@@ -9,6 +9,7 @@ import { downloadAppDataToStorage, getAllDashboardValues, getStatus, getSyncStat
 import MainMenuItem from "../components/MainMenuButton";
 import Storage from "../services/storage";
 import { appStates } from "../constants";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 
 
@@ -19,13 +20,6 @@ export default function Dashboard ({ navigation }) {
     const sync_success = useSelector(getSyncSuccess);
     const dispatch = useDispatch();
     const { user, setUser } = useContext(AuthContext);
-    const isFocused = useIsFocused();
-
-    useEffect(() => {
-        if(isFocused){ 
-            // dispatch(setIdle());
-        }
-    }, [isFocused]);
 
     useEffect(() => {
         if (status === appStates.APP_NOT_READY) {
@@ -65,8 +59,8 @@ export default function Dashboard ({ navigation }) {
         }
       ]
     return( 
-        <View style={{padding: 10, flex: 1}}>
-            <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
+        <SafeAreaView style={{padding: 10}}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <TouchableOpacity
                     style={{...styles.sync, backgroundColor: (sync_success ? 'green':'red')} }
                     onPress={() => Storage.syncAll()}
@@ -76,27 +70,28 @@ export default function Dashboard ({ navigation }) {
                     } 
                 </TouchableOpacity><Text>
                     {                        
-                        (sync_state == appStates.SYNCING) ? "Syncing ..." : sync_success ? "Synced" : "Sync Failed! Get a Better Network"
+                        (sync_state == appStates.SYNCING ) ? "Syncing ..." : sync_success ? "Synced" : "Sync Failed! Network Issues!"
                     }
                     </Text>
             </View>
 
             {
-                (status === appStates.LOADING) && <ActivityIndicator />
-            }
-
-            <View style={styles.dashboardlist}>
-                <DashboardCard title={"Number of Registered Farmers"} value={dashboardValues?.farmer_count || 0 } />
-                <DashboardCard title={"Quantity of Orders"} value={dashboardValues?.total_orders || 0 } />
-                <DashboardCard title={"Total Savings"} value={dashboardValues?.total_savings || 0 } />
-                <DashboardCard title={"Deductions"} value={dashboardValues?.total_deductions || 0 } />
-            </View>
-            
-            <View style={ styles.menuItems }>
-                <MainMenuItem title={"List Farmers"} addNewLink={'RegisterFarmer'} navigation={navigation} />
-                <MainMenuItem title={"List Orders"} addNewLink={'FarmerOrders'} navigation={navigation} />
-                <MainMenuItem title={"Cards Used"} addNewLink={'CardRecharge'} navigation={navigation} />
-                <MainMenuItem title={"List of Deductions"} addNewLink={'NewFarmerDebit'} navigation={navigation} />
+                (status === appStates.LOADING) && (<View><Text>Loading... Plese wait!</Text><ActivityIndicator /></View>)
+            }   
+            <View>
+                <View style={styles.dashboardlist}>
+                    <DashboardCard title={"Number of Registered Farmers"} value={dashboardValues?.farmer_count || "..." } />
+                    <DashboardCard title={"Quantity of Orders"} value={dashboardValues?.total_orders || "..." } />
+                    <DashboardCard title={"Total Savings"} value={dashboardValues?.total_savings || "..." } />
+                    <DashboardCard title={"Deductions"} value={dashboardValues?.total_deductions || "..." } />
+                </View>
+                
+                <View style={ styles.menuItems }>
+                    <MainMenuItem title={"List Farmers"} addNewLink={'RegisterFarmer'} navigation={navigation} />
+                    <MainMenuItem title={"List Orders"} addNewLink={'FarmerOrders'} navigation={navigation} />
+                    <MainMenuItem title={"Cards Used"} addNewLink={'CardRecharge'} navigation={navigation} />
+                    <MainMenuItem title={"List of Deductions"} addNewLink={'NewFarmerDebit'} navigation={navigation} />
+                </View>
             </View>
             <FloatingAction
                 actions={actions}
@@ -123,12 +118,27 @@ export default function Dashboard ({ navigation }) {
             <View>
                 <TouchableOpacity
                     style={styles.logout}
-                    onPress={() => logout()}
+                    onPress={() => {
+                        if (sync_success)
+                            logout()
+                        else
+                            Alert.alert("Warning!", "App is not fully synced with server. You will lose crital data. Do you want to continue?",
+                            [
+                                { 
+                                    text: "YES", onPress: () => {
+                                        logout()
+                                    }
+                                },
+                                {
+                                    text: "NO"
+                                }
+                            ]);
+                        }}
                     >
-                    <Text style={styles.logoutText}>Logout</Text>
+                    <Text style={[styles.logoutText, {backgroundColor: (sync_success?"#A82F15":"grey")}]}>Logout</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -152,7 +162,7 @@ const styles = StyleSheet.create({
     },
     logout: {
         alignSelf: 'center',
-        backgroundColor: '#A82F15',        
+        // backgroundColor: '#A82F15',        
         borderRadius: 10,
         width: '80%',
         zIndex: -1

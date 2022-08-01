@@ -4,15 +4,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { TextInput } from "react-native-element-textinput";
 import { AutoComplete } from 'react-native-element-textinput';
 import { AuthContext } from "../context/AuthContext"
-import { syncParticularKey, 
+import { 
     getAllRegisteredFarmers, 
     recharge,
     getStatus,
     setIdle,
-    getSuccessMsg
+    getSuccessMsg,
+    getError
    } from '../redux/vartafrica';
 import { appStates } from "../constants";
-import { storageKeys } from "../constants";
 
 
 export default function CardRecharge({ navigation }) {
@@ -23,6 +23,7 @@ export default function CardRecharge({ navigation }) {
     const registeredFarmers = useSelector(getAllRegisteredFarmers);
     const status = useSelector(getStatus);
     const responseMsg = useSelector(getSuccessMsg);
+    const errorMsg = useSelector(getError);
     const { user } = useContext(AuthContext);
     
     dispatch = useDispatch();
@@ -38,15 +39,13 @@ export default function CardRecharge({ navigation }) {
             Alert.alert('Success', responseMsg, [
                 { text: "OK", onPress: () => {
                     dispatch(setIdle())
-                    dispatch(syncParticularKey(storageKeys.FARMERS));
-                    dispatch(syncParticularKey(storageKeys.RECHARGE));
                 } }
             ]);
             navigation.navigate('Dashboard');
         }
         
-        if (status === appStates.FAILED){
-            Alert.alert('Failure', responseMsg);
+        if (status === appStates.RECHARGE_FAILED){
+            Alert.alert('Failure', errorMsg);
         }        
        
     }, [dispatch, status]);

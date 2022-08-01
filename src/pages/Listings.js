@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
-import { useSelector } from 'react-redux'; 
+import { useDispatch, useSelector } from 'react-redux'; 
 import { AuthContext } from "../context/AuthContext"
 import { useIsFocused } from "@react-navigation/native";
 import { getAllRegisteredFarmers, 
         getAllFarmerOrders, 
         getAllDeductions,
         getAllCardsUsed,
+        cardsUsed,
+        deductionlist,
         getStatus } from '../redux/vartafrica';
 import { appStates } from "../constants";
 
@@ -19,6 +21,7 @@ export default function Listings ({ route, navigation }) {
     const status = useSelector(getStatus);
     const { user } = useContext(AuthContext);
     const isFocused = useIsFocused();
+    const dispatch = useDispatch();
 
     const { title } = route.params;    
     useEffect(() => {
@@ -26,9 +29,17 @@ export default function Listings ({ route, navigation }) {
     }, []);
 
     useEffect(() => {
-        // if (isFocused){
-        //     dispatch(setIdle());
-        // }
+        if (isFocused){
+            switch(title) {
+                case 'Cards Used':
+                    dispatch(cardsUsed(user.token));
+                break;
+
+                case 'List of Deductions':
+                    dispatch(deductionlist(user.token));
+                break;
+            }
+        }
     },[isFocused]);
 
     //console.log("data",data);
@@ -46,7 +57,7 @@ export default function Listings ({ route, navigation }) {
                 }
             break;
             case 'List Orders':
-                //console.log(farmerOrders);
+                
                 if (status === appStates.APP_READY) {
                     setData((prev) => [...prev, ...farmerOrders.map(
                                                     order => ({
@@ -56,7 +67,7 @@ export default function Listings ({ route, navigation }) {
                 }
             break;
             case 'Cards Used':
-                
+                dispatch(cardsUsed())
                 if (status === appStates.APP_READY) {
                     setData((prev) => [...prev, ...cardsUsedList.map(
                         cardsUsedListItem => (

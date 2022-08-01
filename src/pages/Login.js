@@ -20,10 +20,11 @@
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        let isSubscribed = true
         if (user != null) navigation.navigate('Dashboard');
 
         return (() =>{
-
+            isSubscribed = false;
         });
     });
 
@@ -37,7 +38,7 @@
      if (loggedUser.success){
         await setUser(loggedUser);
         console.log(loggedUser);
-        setLoading(false);
+        setLoading((prev) => false);
         navigation.navigate('Dashboard');
      } else {
         Alert.alert("Failure", "Login Failed")

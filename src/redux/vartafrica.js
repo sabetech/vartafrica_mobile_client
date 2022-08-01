@@ -8,7 +8,8 @@ import {
   getUsedCardsByAgent,
   getListOfvariety,
   getListOfCrops,
-  saveFarmerDebitAPI
+  saveFarmerDebitAPI,
+  rechargeAPI
 } from '../services/api'
 import Storage from '../services/storage';
 import { uuidv4 } from '../utils';
@@ -260,43 +261,48 @@ export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { de
   }
 });
 
-export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rechargeInfo, token}, { getState } ) => {
+export const recharge = createAsyncThunk('agent/farmer/recharge', async ( { rechargeInfo, token}, { rejectWithValue } ) => {
   try {
-    const requestInfo = {
-      url: 'recharge',
-      method: 'POST',
-      body: rechargeInfo,
-      headers: {
-        'Content-Type': 'application/json',
-        'token': token
-      },
-      message: 'Recharge has been saved successfully',
-      synced: false
-    }
 
-    const curState = getState();
-    const myfarmer = curState.vartafrica.registeredFarmers.find(myfarmer => myfarmer.id == rechargeInfo.farmers)
-    
-    const new_storage_recharge = {
-      id: uuidv4(),
-      amount: 'x',
-      serial: rechargeInfo.serial_number,
-      used_by: myfarmer.name
-    }
-    
-    const response = await Storage.saveFormData( storageKeys.RECHARGE, { storage_data: new_storage_recharge, requestInfo} );
-    
+    const response =  await rechargeAPI(rechargeInfo, token)
+    console.log("RECHARGE", response);
     if (response.success) {
       const { message } = response;
       return {
-        message, 
-        recharge: {
-          ...new_storage_recharge
-        }
+        message
       };
+    }else{
+      return rejectWithValue(response.message);
     }
-
+  
   }catch ( err ) {
+    return rejectWithValue(err.message)
+  }
+});
+
+export const cardsUsed = createAsyncThunk('agent/farmer/cardsused', async ( token, { rejectWithValue } ) => {
+  
+  try{
+    const response = await getUsedCardsByAgent( token );
+    
+    if (response.success) {
+      const { data } = response;
+      return data
+    }
+    
+  }catch( err ){
+    
+    return rejectWithValue(err.message);
+  }
+});
+
+export const deductionlist = createAsyncThunk('agent/debit/list', async ( token ) => {
+  
+  try{
+    const response = await getListOfDeductions(token);
+    return response.data;
+  }catch( err ){
+    console.log(err.message);
     return err.message;
   }
 });
@@ -313,9 +319,10 @@ export const syncAll = createAsyncThunk('app/syncAll', async (_, { rejectWithVal
 export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async (key, { rejectWithValue }) => {
   try{
     const response = await Storage.syncParticularData(key);
+    console.log(response)
     return response;
   }catch(e){
-    return rejectWithValue(e.message());
+    return rejectWithValue(e.message);
   }
 });
 
@@ -407,22 +414,30 @@ export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async
         })
         .addCase(saveFarmerDebit.rejected, (state, action) => {
           state.status = appStates.DEBIT_FAILED;
-          console.log(action.error);
-          console.log(action.payload);
-          state.error = action.error.message;
+          state.error = action.payload;
         })
         .addCase(recharge.pending, (state) => {
-          state.status = 'saving-recharge';
+          state.status = appStates.RECHARGE_SAVING;
         })
         .addCase(recharge.fulfilled, (state, action) => {
           
           state.success_msg = action.payload.message;
-          state.cardsUsed = [...state.cardsUsed, action.payload.recharge];
-
           state.status = appStates.RECHARGE_SAVED;
 
         })
         .addCase(recharge.rejected, (state, action) => {
+          state.status = appStates.RECHARGE_FAILED;
+          state.error = action.payload;
+        })
+        .addCase(deductionlist.pending, (state) => {
+          state.status = appStates.LOADING;
+        })
+        .addCase(deductionlist.fulfilled, (state, action) => {
+          state.deductions = action.payload;
+          state.status = appStates.APP_READY
+
+        })
+        .addCase(deductionlist.rejected, (state, action) => {
           state.status = 'failed';
           state.error = action.error.message;
         })

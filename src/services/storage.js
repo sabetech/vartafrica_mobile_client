@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { appStates, storageKeys } from '../constants';
 const baseUrl = 'http://vartafrica.com/api/';
+
 class Storage {
 
     static async clear(){
@@ -103,9 +104,23 @@ class Storage {
                 const response = await this.syncOne(existingdata[j].requestInfo);
                 await this.syncCleanUp(key, j, response);
             }
+            const check = await this.checkIfParticularDataSynced(key)
+            return {
+                success: check
+            }
         }catch( e ){
             throw new Error(e.message())
         }
+    }
+
+    static async checkIfParticularDataSynced(key) {
+        const existingdata = await this.getData(key);
+
+        for(let j = 0;j < existingdata.length;j++) {
+            if (existingdata[j]?.requestInfo == undefined) continue;
+            return false;
+        }
+        return true;
     }
 
     static async makePostRequest(requestInfo){

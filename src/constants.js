@@ -22,6 +22,7 @@ export const appStates = {
     DEBIT_FAILED: 'farmer-debit-failed',
     RECHARGE_SAVED: 'farmer-recharge-success',
     RECHARGE_SAVING: 'app-recharge-saving',
+    RECHARGE_FAILED: 'app-recharge-failed',
     SYNCING: 'app-syncing',
     SYNCING_COMPLETE: 'app-syncing-complete',
     SYNCING_IDLE: 'app-syncing-idle',
