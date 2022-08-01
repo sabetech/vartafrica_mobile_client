@@ -10,7 +10,10 @@ that has logged and the agent can perform the necessary actions an agent can per
 
 - The agent can also list all the items they have saved so far. When the app has internet access, it will synchronise with the remote database.
 
+<img width="431" alt="Screenshot 2022-08-01 at 6 51 43 PM" src="https://user-images.githubusercontent.com/4713955/182222347-bf535850-3d6a-4f4f-955f-df60a52d03e5.png">
+
 ## Built with
+
 - **React Native** **Redux-Toolkit**
 
 ## Getting Started (Technical)
