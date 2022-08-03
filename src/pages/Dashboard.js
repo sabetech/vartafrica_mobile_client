@@ -28,7 +28,7 @@ export default function Dashboard ({ navigation }) {
         if ((netInfo.isConnected) && (! sync_success)) {
             dispatch(syncAll());
         }
-    }, [isFocused]);
+    }, [netInfo]);
 
     useEffect(() => {
         console.log("APP STATE ",status);
