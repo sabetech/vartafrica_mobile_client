@@ -9,6 +9,25 @@ class Storage {
         await AsyncStorage.clear();
     }
 
+    static async hasValidData(){
+        if (!this.getData(storageKeys.FARMERS)) return false
+        return true;
+    }
+
+    static async storeUser(user){
+        try{
+            await AsyncStorage.setItem(storageKeys.USER, JSON.stringify(user));
+        }catch(e){
+            throw new Error("Couldn't save local storage");
+        }
+        
+    }
+
+    static async getLoggedInUser(){
+        const response = await AsyncStorage.getItem(storageKeys.USER);
+            return response != null ? JSON.parse(response) : null
+    }
+
     static async saveData(key, data) {
         try{
             const existingData = await this.getData(key);
@@ -182,11 +201,13 @@ class Storage {
                 }
                 console.log("DONE WITH->", keys[i]);
             }
+            console.log("Syncing complete");
             const check = await this.checkIfSyncedAll();
             return {
                 success: check
             }
         } catch(e) {
+            console.log("error with sycing");
             throw new Error(e.message());
         }
     }

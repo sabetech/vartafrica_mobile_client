@@ -45,7 +45,11 @@ export default function CardRecharge({ navigation }) {
         }
         
         if (status === appStates.RECHARGE_FAILED){
-            Alert.alert('Failure', errorMsg);
+            Alert.alert('Failure', errorMsg, [
+                { text: "OK", onPress: () => {
+                    dispatch(setIdle())
+                } }
+            ]);
         }        
        
     }, [dispatch, status]);

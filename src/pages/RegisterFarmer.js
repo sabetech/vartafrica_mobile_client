@@ -51,7 +51,11 @@ export default function RegisterFarmer({ navigation }) {
                 }            
             });
         }catch( e ) {
-            Alert.alert("Warning", "Could not get location");
+            Alert.alert("Warning", "Could not get location",[
+                { text: "OK", onPress: () => {
+                    dispatch(setIdle())
+                } }
+              ]);
         }
         
         return (() => {
@@ -61,19 +65,22 @@ export default function RegisterFarmer({ navigation }) {
     }, []);
 
     useEffect(() => {
-        //console.log(status)
         if (status == appStates.FARMER_SAVED){
             Alert.alert("Success", "Farmer Registered Successfully", [
-                
                 { 
                     text: "OK", onPress: () => {
-                    dispatch(setIdle());
-                    dispatch(syncParticularKey(storageKeys.FARMERS));
-                } 
-            }
+                        dispatch(setIdle());
+                        dispatch(syncParticularKey(storageKeys.FARMERS));
+                    } 
+                }
               ]);
-            
             navigation.goBack();
+        }else{
+            Alert.alert("Failure", "Failed to Register farmer", [
+                { text: "OK", onPress: () => {
+                    dispatch(setIdle())
+                } }
+              ]);
         }
         
         return (() => {

@@ -45,7 +45,11 @@ export default function NewFarmerDebit({ navigation }) {
            
         }
 
-        if (status === appStates.DEBIT_FAILED) {
+        if (status === appStates.DEBIT_FAILED, [
+            { text: "OK", onPress: () => {
+                dispatch(setIdle())
+            } }
+          ]) {
             Alert.alert('Failure', errormsg);
         }
        

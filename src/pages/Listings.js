@@ -9,7 +9,7 @@ import { getAllRegisteredFarmers,
         getAllCardsUsed,
         cardsUsed,
         deductionlist,
-        getStatus } from '../redux/vartafrica';
+        getStatus, setIdle } from '../redux/vartafrica';
 import { appStates } from "../constants";
 
 export default function Listings ({ route, navigation }) {
@@ -30,6 +30,7 @@ export default function Listings ({ route, navigation }) {
 
     useEffect(() => {
         if (isFocused){
+            dispatch(setIdle())
             switch(title) {
                 case 'Cards Used':
                     dispatch(cardsUsed(user.token));
@@ -41,8 +42,6 @@ export default function Listings ({ route, navigation }) {
             }
         }
     },[isFocused]);
-
-    //console.log("data",data);
 
     useEffect(() => {
         //find out what page this is ... 

@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, isRejectedWithValue } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { appStates, storageKeys } from '../constants';
 import { 
   getDashboardValues, 
@@ -63,7 +63,7 @@ const fetchDashboardValuesFromServer = async (token) => {
       return data;
     }    
   }catch (err) {
-    throw new Error(err.message());
+    throw new Error(err.message);
   }
 }
 
@@ -184,7 +184,7 @@ export const registerFarmerThunk = createAsyncThunk('farmer/register', async ({ 
   }
 });
 
-export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {order, ui_info, token},{ getState } ) => {
+export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {order, token},{ getState } ) => {
   try {
     const requestInfo = {
       url: 'register',
@@ -197,12 +197,13 @@ export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {o
       message: 'Order has been saved successfully',
       synced: false
     }
-      
+  
     const curState = getState();
-    const myfarmer = curState.vartafrica.registeredFarmers.find(_myfarmer => _myfarmer.contact == order.farmers);
+    const myfarmer = curState.vf.registeredFarmers.find(_myfarmer => _myfarmer.contact == order.farmers);
     if (!myfarmer) 
       throw new Error("Could not find farmer");
 
+    
     const new_storage_orders = [];
     for(let i = 0;i < order.variety.length;i++){
 
@@ -215,6 +216,8 @@ export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {o
       };
       new_storage_orders.push(new_storage_order);
     }
+
+    
     const response = await Storage.saveFormDataArray( storageKeys.ORDERS,  { storage_data: new_storage_orders, requestInfo });
     
     if (response.success) {
@@ -236,7 +239,7 @@ export const saveFarmerDebit = createAsyncThunk('agent/debit/save', async ( { de
   try {
     
     const curState = getState();
-    const myfarmer = curState.vartafrica.registeredFarmers.find(myfarmer => myfarmer.id == debit.user_id)
+    const myfarmer = curState.vf.registeredFarmers.find(myfarmer => myfarmer.id == debit.user_id)
     
     const new_storage_debit = {
       id: uuidv4(),
@@ -359,7 +362,6 @@ export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async
           state.status = appStates.LOADING
         })
         .addCase(downloadAppDataToStorage.fulfilled, (state, action) => {
-          
           state.dashboard_values = action.payload.dashboard_result;
           state.registeredFarmers = action.payload.farmer_result;
           state.farmerOrders = action.payload.order_result;
@@ -386,11 +388,11 @@ export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async
           
         })
         .addCase(registerFarmerThunk.rejected, (state, action) => {
-          state.status = 'failed';
+          state.status = appStates.FAILED;
           state.error = action.error.message;
         })
         .addCase(saveOrderByAgent.pending, (state) => {
-          state.status = 'saving-order';
+          state.status = appStates.ORDER_SAVING;
         })
         .addCase(saveOrderByAgent.fulfilled, (state, action) => {
           
@@ -402,7 +404,7 @@ export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async
           state.status = appStates.ORDER_SAVED;
         })
         .addCase(saveOrderByAgent.rejected, (state, action) => {
-          state.status = 'failed';
+          state.status = appStates.FAILED;
           state.error = action.error.message;
         })
         .addCase(saveFarmerDebit.pending, (state) => {
@@ -474,18 +476,18 @@ export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async
   });
 
   export const { setIdle, setAppNotReady } = varfAfricaSlice.actions;
-  export const getAllDashboardValues = (state) => state.vartafrica.dashboard_values;
-  export const getAllRegisteredFarmers = (state) => state.vartafrica.registeredFarmers;
-  export const getAllFarmerOrders = (state) => state.vartafrica.farmerOrders;
-  export const getAllDeductions = (state) => state.vartafrica.deductions;
-  export const getAllCardsUsed = (state) => state.vartafrica.cardsUsed;
-  export const getStatus = (state) => state.vartafrica.status;
-  export const getCrops = (state) => state.vartafrica.crops;
-  export const getVarieties = (state) => state.vartafrica.varieties;
-  export const getError = (state) => state.vartafrica.error;
-  export const getSuccess = (state) => state.vartafrica.success;
-  export const getSuccessMsg = (state) => state.vartafrica.success_msg;
-  export const getSyncState = (state) =>state.vartafrica.sync_state;
-  export const getSyncSuccess = (state) =>state.vartafrica.sync_success;
+  export const getAllDashboardValues = (state) => state?.vf?.dashboard_values;
+  export const getAllRegisteredFarmers = (state) => state?.vf?.registeredFarmers;
+  export const getAllFarmerOrders = (state) => state?.vf?.farmerOrders;
+  export const getAllDeductions = (state) => state?.vf?.deductions;
+  export const getAllCardsUsed = (state) => state?.vf?.cardsUsed;
+  export const getStatus = (state) => state?.vf?.status;
+  export const getCrops = (state) => state?.vf?.crops;
+  export const getVarieties = (state) => state?.vf?.varieties;
+  export const getError = (state) => state?.vf?.error;
+  export const getSuccess = (state) => state?.vf?.success;
+  export const getSuccessMsg = (state) => state?.vf?.success_msg;
+  export const getSyncState = (state) => state?.vf?.sync_state;
+  export const getSyncSuccess = (state) => state?.vf?.sync_success;
 
   export default varfAfricaSlice.reducer;

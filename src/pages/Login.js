@@ -10,7 +10,7 @@
  import { SafeAreaView, StyleSheet, TextInput, ActivityIndicator, View, Text, TouchableOpacity, Image, Alert } from 'react-native';
  import { AuthContext } from '../context/AuthContext';
  import { login } from '../services/api';
- import Storage from '../services/storage';
+import Storage from '../services/storage';
 
  export default function Login ({ navigation }) {
 
@@ -37,7 +37,8 @@
      
      if (loggedUser.success){
         await setUser(loggedUser);
-        console.log(loggedUser);
+        Storage.storeUser(loggedUser);
+        console.log(loggedUser)
         setLoading((prev) => false);
         navigation.navigate('Dashboard');
      } else {

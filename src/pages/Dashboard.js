@@ -1,17 +1,17 @@
 import React, { useContext, useEffect } from "react";
 import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { useIsFocused } from "@react-navigation/native";
+import {useNetInfo} from "@react-native-community/netinfo";
 import DashboardCard from "../components/DashboardCard";
 import { FloatingAction } from "react-native-floating-action";
 import { AuthContext } from "../context/AuthContext";
-import { downloadAppDataToStorage, getAllDashboardValues, getStatus, getSyncState, getSyncSuccess, setAppNotReady } from '../redux/vartafrica';
+import vartafrica, { downloadAppDataToStorage, loadAsyncStorageIntoRedux, getAllDashboardValues, getStatus, getSyncState, getSyncSuccess, setAppNotReady, syncAll } from '../redux/vartafrica';
 import MainMenuItem from "../components/MainMenuButton";
 import Storage from "../services/storage";
 import { appStates } from "../constants";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-
+import { useIsFocused } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Dashboard ({ navigation }) {
     const dashboardValues = useSelector(getAllDashboardValues);
@@ -20,16 +20,28 @@ export default function Dashboard ({ navigation }) {
     const sync_success = useSelector(getSyncSuccess);
     const dispatch = useDispatch();
     const { user, setUser } = useContext(AuthContext);
+    const isFocused = useIsFocused();
+    const netInfo = useNetInfo();
 
     useEffect(() => {
+        // AsyncStorage.clear()
+        if ((netInfo.isConnected) && (! sync_success)) {
+            // dispatch(syncAll());
+        }
+    }, [isFocused]);
+
+    useEffect(() => {
+        console.log("APP STATE ",status);
         if (status === appStates.APP_NOT_READY) {
-            Storage.clear();
+            //if there are things in storage not synced ... use that one
             dispatch(downloadAppDataToStorage(user.token));
+            
         } 
     }, [dispatch, status]);
 
     const logout = () => {
         setUser(null);
+        Storage.clear();
         dispatch(setAppNotReady());
     }
 
@@ -64,7 +76,7 @@ export default function Dashboard ({ navigation }) {
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <TouchableOpacity
                     style={{...styles.sync, backgroundColor: (sync_success ? 'green':'red')} }
-                    onPress={() => Storage.syncAll()}
+                    onPress={() => dispatch(syncAll())}
                 >
                     {
                         ( sync_state == appStates.SYNCING ) ? <ActivityIndicator color={'white'} size={'large'}/> : <Text style={styles.syncText}>Sync</Text>
@@ -75,10 +87,12 @@ export default function Dashboard ({ navigation }) {
                     }
                     </Text>
             </View>
-
-            {
-                (status === appStates.LOADING) && (<View><Text>Loading... Plese wait!</Text><ActivityIndicator /></View>)
-            }   
+            <View>
+                {
+                    (status === appStates.LOADING) && (<View><Text>Loading... Plese wait!</Text><ActivityIndicator /></View>) 
+                    || <Text>Connection: { netInfo.type.toUpperCase() } {netInfo.isConnected?"ONLINE":"OFFLINE"}</Text>   
+                }   
+            </View>
             <View>
                 <View style={styles.dashboardlist}>
                     <DashboardCard title={"Number of Registered Farmers"} value={dashboardValues?.farmer_count || "..." } />

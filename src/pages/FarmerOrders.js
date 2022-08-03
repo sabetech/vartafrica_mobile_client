@@ -111,19 +111,9 @@ export default function FarmerOrders ({ navigation }) {
             dis_val_per_unit,
             net_order_value,
         }
-
-       const ui_info = [];
-       varietyViewControls.forEach((_, i) => {
-            ui_info.push({
-                name: selectedFarmer,
-                variety: variety[i],
-                quantity_ordered: seed_quantity[i]
-            });
-       });
       
         const thunkArgs = {
             order,
-            ui_info,
             token: user.token
         }
         dispatch(saveOrderByAgent(thunkArgs));
