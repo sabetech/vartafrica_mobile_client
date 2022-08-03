@@ -75,7 +75,8 @@ export default function RegisterFarmer({ navigation }) {
                 }
               ]);
             navigation.goBack();
-        }else{
+        }
+        if (status == appStates.FAILED){
             Alert.alert("Failure", "Failed to Register farmer", [
                 { text: "OK", onPress: () => {
                     dispatch(setIdle())

@@ -82,6 +82,14 @@ export default function FarmerOrders ({ navigation }) {
             navigation.navigate('Dashboard');    
         }
 
+        if (status == appStates.FAILED){
+            Alert.alert("Failed", "Order failed to Save", [
+                { text: "OK", onPress: () => {
+                    dispatch(setIdle())
+                }}
+            ]);
+        }
+
     }, [dispatch, status]);
 
     useEffect(() => {
