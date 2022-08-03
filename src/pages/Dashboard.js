@@ -5,7 +5,7 @@ import {useNetInfo} from "@react-native-community/netinfo";
 import DashboardCard from "../components/DashboardCard";
 import { FloatingAction } from "react-native-floating-action";
 import { AuthContext } from "../context/AuthContext";
-import vartafrica, { downloadAppDataToStorage, loadAsyncStorageIntoRedux, getAllDashboardValues, getStatus, getSyncState, getSyncSuccess, setAppNotReady, syncAll } from '../redux/vartafrica';
+import { downloadAppDataToStorage, getAllDashboardValues, getStatus, getSyncState, getSyncSuccess, setAppNotReady, syncAll } from '../redux/vartafrica';
 import MainMenuItem from "../components/MainMenuButton";
 import Storage from "../services/storage";
 import { appStates } from "../constants";
@@ -26,7 +26,7 @@ export default function Dashboard ({ navigation }) {
     useEffect(() => {
         // AsyncStorage.clear()
         if ((netInfo.isConnected) && (! sync_success)) {
-            // dispatch(syncAll());
+            dispatch(syncAll());
         }
     }, [isFocused]);
 
