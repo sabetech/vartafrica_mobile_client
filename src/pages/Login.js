@@ -42,12 +42,20 @@ import Storage from '../services/storage';
         setLoading((prev) => false);
         navigation.navigate('Dashboard');
      } else {
-        Alert.alert("Failure", "Login Failed")
+        Alert.alert("Failure", "Login Failed", [
+            { text: "OK", onPress: () => {
+                setLoading(prev => false);
+            } }
+        ])
      }
      
     }catch( e ) {
-        Alert.alert("Failure", "Network issue!")
-        setLoading(false);
+        Alert.alert("Failure", "Network issue!",
+        [
+            { text: "OK", onPress: () => {
+                setLoading(prev => false);
+            } }
+        ])
     }
      
  }

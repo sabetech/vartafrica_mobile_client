@@ -11,7 +11,6 @@ import Storage from "../services/storage";
 import { appStates } from "../constants";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useIsFocused } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Dashboard ({ navigation }) {
     const dashboardValues = useSelector(getAllDashboardValues);

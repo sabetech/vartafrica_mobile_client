@@ -31,12 +31,14 @@ export default function RegisterFarmer({ navigation }) {
     const [next_of_kin_name, setNameOfNextKin] = useState("next_of_kin");
     const [next_of_kin_phone, setMobileNumberOfNextKin] = useState("242353");
     const [password, setPasswordOfFarmer] = useState("asdfasdf");
+    const [password_err, setPasswordErr] = useState("");
     const [latitude, setLatitude] = useState("0");
     const [longitude, setLongitude] = useState("0");
     const [disability_status, setDisabilityStatus] = useState("no");
     const [land_area, setLandarea] = useState("123");
     const [mechanization_needed, setMechanizationNeeded] = useState("yes");
     const [fertilizer, setFertilizer] = useState("yes");
+    
     const dispatch = useDispatch();
     const status = useSelector(getStatus);
 
@@ -138,10 +140,59 @@ export default function RegisterFarmer({ navigation }) {
             console.warn(err.message)
         return false
         }
+    }
+
+    const validatePassword = (password_text) => {
+        const uppercaseRegExp   = /(?=.*?[A-Z])/;
+        const lowercaseRegExp   = /(?=.*?[a-z])/;
+        const digitsRegExp      = /(?=.*?[0-9])/;
+        const specialCharRegExp = /(?=.*?[#?!@$%^&*-])/;
+        const minLengthRegExp   = /.{8,}/;
+
+        const passwordLength =      password_text.length;
+        const uppercasePassword =   uppercaseRegExp.test(password_text);
+        const lowercasePassword =   lowercaseRegExp.test(password_text);
+        const digitsPassword =      digitsRegExp.test(password_text);
+        const specialCharPassword = specialCharRegExp.test(password_text);
+        const minLengthPassword =   minLengthRegExp.test(password_text);
+
+        let errMsg ="";
+        if(passwordLength===0){
+                errMsg="Password is empty";
+        }else if(!uppercasePassword){
+                errMsg="At least one Uppercase";
+        }else if(!lowercasePassword){
+                errMsg="At least one Lowercase";
+        }else if(!digitsPassword){
+                errMsg="At least one digit";
+        }else if(!specialCharPassword){
+                errMsg="At least one Special Characters";
+        }else if(!minLengthPassword){
+                errMsg="At least minumum 8 characters";
+        }else{
+            errMsg="";
+        }
+        
+        setPasswordErr(errMsg);    
 
     }
       
     const handleSubmitRegister = () => {
+        let form_validated = true;
+        if (mobileNumber.length < 9)
+            form_validated = false;
+        
+        if (next_of_kin_phone.length < 9)
+            form_validated = false;
+            
+        if (password_err.length > 0)
+            form_validated = false;
+
+        if (!form_validated) {
+            Alert.alert("Error", "Some form values are not valid")
+            return;
+        }
+
         let newFarmer = {
             first_name,
             last_name,
@@ -217,7 +268,10 @@ export default function RegisterFarmer({ navigation }) {
         <TextInput style={styles.input} 
             inputStyle={styles.inputStyle}
             labelStyle={styles.labelStyle}
-            onChangeText={(text) => setMobileNumber(text)} value={mobileNumber} placeholder="+235" label="Mobile Number" />
+            textError={mobileNumber.length == 9 ? "" : "Phone number is incorrect"}
+            textErrorStyle={styles.textErrorStyle}
+            keyboardType={'number-pad'}
+            onChangeText={(text) => setMobileNumber(text.replace(/[^0-9]/g, ''))} value={mobileNumber} placeholder="000000000" label="Mobile Number" />
 
         <Text>Select Sex</Text>
         <Picker
@@ -234,6 +288,7 @@ export default function RegisterFarmer({ navigation }) {
             <TextInput style={styles.input} 
             inputStyle={styles.inputStyle}
             labelStyle={styles.labelStyle}
+            keyboardType={'number-pad'}
             onChangeText={(text) => setAge(text)} value={age} placeholder="29" label="Age" />
 
             <TextInput style={styles.input} 
@@ -311,7 +366,10 @@ export default function RegisterFarmer({ navigation }) {
         <TextInput style={styles.input} 
             inputStyle={styles.inputStyle}
             labelStyle={styles.labelStyle}
-            onChangeText={(text) => setMobileNumberOfNextKin(text)} value={next_of_kin_phone} placeholder="+235" label="Mobile Number of Next of Kin" />
+            textError={next_of_kin_phone.length == 9 ? "" : "Phone number is incorrect"}
+            textErrorStyle={styles.textErrorStyle}
+            keyboardType={'number-pad'}
+            onChangeText={(text) => setMobileNumberOfNextKin(text.replace(/[^0-9]/g, ''))} value={next_of_kin_phone} placeholder="000000000" label="Mobile Number of Next of Kin" />
 
         <TextInput style={styles.input} 
             inputStyle={styles.inputStyle}
@@ -357,7 +415,13 @@ export default function RegisterFarmer({ navigation }) {
         <TextInput style={styles.input} 
             inputStyle={styles.inputStyle}
             labelStyle={styles.labelStyle}
-            onChangeText={(text) => setPasswordOfFarmer(text)} 
+            textError={ password_err }
+            textErrorStyle={styles.textErrorStyle}
+            onChangeText={(text) => {
+                    validatePassword(text)
+                    setPasswordOfFarmer(text)
+                }
+            } 
             value={password} placeholder="your password ..." label="Password of Farmer"
             secureTextEntry
             />
@@ -397,6 +461,10 @@ const styles = StyleSheet.create({
       },
       submitButtonView: {
         marginVertical: 10
+    },
+    textErrorStyle: {
+        marginTop: -10,
+        marginBottom: 10
     },
     submitButton:{
         display: 'flex',

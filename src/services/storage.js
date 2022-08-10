@@ -65,22 +65,9 @@ class Storage {
     static async saveFormDataArray(key, formRequestData){
         const existingData = await this.getData(key);
         const {storage_data, requestInfo} = formRequestData;
-
-        //in this case, storage_data is an []
-        const _storevalue = {
-            ...storage_data[0], requestInfo
-        }
-        await AsyncStorage.setItem(key, JSON.stringify([...existingData, _storevalue]));
-
-        if (storage_data.length > 1){
-            for(let i = 1;i < storage_data.length;i++) {
-                const _storevalue = {
-                    ...storage_data[i]
-                }
-                await AsyncStorage.setItem(key, JSON.stringify([...existingData, _storevalue]));
-            }
-        }
         
+        await AsyncStorage.setItem(key, JSON.stringify([...existingData, ...storage_data, {requestInfo: requestInfo}]));
+                
         const response = {
             success: true,
             message: requestInfo.message
@@ -114,7 +101,6 @@ class Storage {
 
     static async syncParticularData(key){
         const existingdata = await this.getData(key);
-
         try{
             for(let j = 0;j < existingdata.length;j++) {
                 
@@ -143,6 +129,9 @@ class Storage {
     }
 
     static async makePostRequest(requestInfo){
+        
+        console.log("BODY ",requestInfo.body)
+
         try {
             const response = await fetch(`${baseUrl}${requestInfo.url}`, {
                 method: 'POST',

@@ -217,7 +217,6 @@ export const saveOrderByAgent = createAsyncThunk('agent/orders/save', async ( {o
       new_storage_orders.push(new_storage_order);
     }
 
-    
     const response = await Storage.saveFormDataArray( storageKeys.ORDERS,  { storage_data: new_storage_orders, requestInfo });
     
     if (response.success) {
@@ -322,7 +321,6 @@ export const syncAll = createAsyncThunk('app/syncAll', async (_, { rejectWithVal
 export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async (key, { rejectWithValue }) => {
   try{
     const response = await Storage.syncParticularData(key);
-    console.log(response)
     return response;
   }catch(e){
     return rejectWithValue(e.message);

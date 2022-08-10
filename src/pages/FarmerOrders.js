@@ -120,6 +120,8 @@ export default function FarmerOrders ({ navigation }) {
             net_order_value,
         }
       
+        console.log(order)
+
         const thunkArgs = {
             order,
             token: user.token
@@ -152,12 +154,14 @@ export default function FarmerOrders ({ navigation }) {
                         style={styles.input} 
                         inputStyle={styles.inputStyle}
                         labelStyle={styles.labelStyle}
+                        keyboardType={'numeric'}
                         onChangeText={(text) => handleSeedQtyChanged(text, key)} value={ seed_quantity[key] } />
 
                     <TextInput label="Unit Price (UGX)" 
                         style={styles.input} 
                         inputStyle={styles.inputStyle}
                         labelStyle={styles.labelStyle}
+                        keyboardType={'numeric'}
                         onChangeText={(text) => handleUnitPriceChanged(text, key)} value={ unit_price[key] } />
 
                     {/* ////// USING REACT NATIVE TextInput HERE DIFFERENT FROM TextInput FROM A LIBRARY /////// */}
