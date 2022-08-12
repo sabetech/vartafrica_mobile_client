@@ -66,6 +66,17 @@ export default function NewFarmerDebit({ navigation }) {
     const submitFarmerDebit = () => {
         const farmerContact = getSelectedFarmerContact(selectedFarmer)
         const farmerInstance = registeredFarmers.find(regFarmer => regFarmer.contact == farmerContact);
+        
+        if (!farmerInstance) {
+            Alert.alert("Error", "Couldn't find farmer");
+            return;
+        }
+
+        if (amount.length === 0){
+            Alert.alert("Error", "Amount field is empty!");
+            return;
+        }
+
         const debit = {
             user_id: farmerInstance.id,
             amount,

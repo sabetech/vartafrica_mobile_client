@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext, useRef } from "react";
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, TextInput as Ti} from "react-native";
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, TextInput as Ti, Switch} from "react-native";
 import { useDispatch, useSelector } from 'react-redux'; 
 import { TextInput, AutoComplete } from "react-native-element-textinput";
 import { AuthContext } from "../context/AuthContext"
@@ -17,15 +17,20 @@ import { storageKeys } from "../constants";
 
 export default function FarmerOrders ({ navigation }) {
     const [selectedFarmer, setSelectedFarmer] = useState();
+    const [isValidFarmer, setIsValidFarmer] = useState(true);
+    const [isValidItem, setIsValidItem] = useState(true);
     const [seed_quantity, setSeedQty] = useState(["0"]);
-    const [crop_cultivated, setCropCultivated] = useState("Banana");
-    const [variety, setVariety] = useState(["Mpologoma"]);
+    const [crop_cultivated, setCropCultivated] = useState("");
+    const [variety, setVariety] = useState([""]);
+    const [isValidVariety, setIsValidVariety] = useState([true]);
     const [unit_price, setUnitPrice] = useState(["0"]);
     const [total_price, setTotalPrice] = useState(["0"]);
     const [dis_val_per_unit, setDisValPerUnit] = useState("0");
     const [net_order_value, setnetOrderValue] = useState(0);
     const [varietyViewControls, setVarietyView] = useState([]);
+    const [isDiscountPercentageEnabledEnabled, setIsDiscountPercentageEnabled] = useState(false);
     
+
     const dispatch = useDispatch();
     const status = useSelector(getStatus);
     const crops = useSelector(getCrops);
@@ -34,11 +39,13 @@ export default function FarmerOrders ({ navigation }) {
     const { user } = useContext(AuthContext);
 
     const inputRefs = useRef([]);
+
+    const toggleSwitch = () => setIsDiscountPercentageEnabled(previousState => !previousState);
     
     useEffect(() => {
         LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
         dispatch(setIdle());
-        setVarietyView((prev) => [...prev, varietyControl(prev.length)]);
+        setVarietyView((prev) => [...prev, varietyControl(prev.length) ]);
     }, []);
 
     useEffect(() => {
@@ -56,8 +63,13 @@ export default function FarmerOrders ({ navigation }) {
         if (isNaN(dis_val_per_unit)) return;
         if (total_price.some(el => isNaN(el))) return;
 
-        setnetOrderValue((total_price.reduce((prev, curr) => prev + curr, 0) - parseFloat(dis_val_per_unit)).toString());
-
+        if (isDiscountPercentageEnabledEnabled){
+            const sum_total_price = total_price.reduce((prev, curr) => prev + curr, 0);
+            setnetOrderValue((sum_total_price - ((parseFloat(dis_val_per_unit)/100) * sum_total_price)).toString());
+        }else {
+            setnetOrderValue((total_price.reduce((prev, curr) => prev + curr, 0) - parseFloat(dis_val_per_unit)).toString());
+        }
+        
         if (inputRefs)
             total_price.map((total,i) => {
                 if (typeof inputRefs.current[i] === 'undefined') return;
@@ -65,9 +77,8 @@ export default function FarmerOrders ({ navigation }) {
                 inputRefs.current[i].setNativeProps({text: total.toString()});
             });
 
-    }, [total_price])
+    }, [total_price, isDiscountPercentageEnabledEnabled])
     
-    //load farmers from remote api ... or from localstore
     useEffect(() => {
         
         if (status == appStates.ORDER_SAVED){
@@ -92,12 +103,6 @@ export default function FarmerOrders ({ navigation }) {
 
     }, [dispatch, status]);
 
-    useEffect(() => {
-
-        setSelectedFarmer(registeredFarmers[0]?.name+" "+registeredFarmers[0]?.last_name + "("+registeredFarmers[0]?.contact+")");
-
-    },[registeredFarmers]);
-
     const getSelectedFarmerContact = (farmerText) => {
         let firstBracket = farmerText.indexOf("(");
         let secondBracket = farmerText.indexOf(")");
@@ -107,6 +112,12 @@ export default function FarmerOrders ({ navigation }) {
     }
 
     const saveFarmerOrder = () => {
+
+        if (!validateForm()) {
+            Alert.alert("Error", "Make sure you have entered all the required fields"); 
+            return;
+        }
+
         let actualSelectedFarmer = getSelectedFarmerContact(selectedFarmer);
 
         const order = {
@@ -119,14 +130,57 @@ export default function FarmerOrders ({ navigation }) {
             dis_val_per_unit,
             net_order_value,
         }
-      
-        console.log(order)
 
         const thunkArgs = {
             order,
             token: user.token
         }
         dispatch(saveOrderByAgent(thunkArgs));
+    }
+
+    const validateForm = () => {
+        let chksum = 0;
+
+        if (selectedFarmer === "") chksum++;
+        if (crop_cultivated === "") chksum++;
+        if (variety[0].length === 0) chksum++;
+        if (!validateFarmerSelection()) {
+            setIsValidFarmer(false);
+            chksum++;
+        }
+
+        if (!validateItem()){
+            setIsValidItem(false);
+            chksum++;
+        }
+
+        if (!validateVariety()){
+            chksum++;
+        }
+
+        if (chksum > 0) return false
+        return true;
+    }
+
+    const validateFarmerSelection = () => {
+        return undefined !== registeredFarmers.find((farmer) => farmer.name+" "+farmer.last_name + "("+farmer.contact+")" === selectedFarmer);        
+    }
+
+    const validateItem = () => {
+        return undefined !== crops.find(crop => crop.name === crop_cultivated)
+    }
+
+    const validateVariety = () => {
+
+        if (variety.some(v => v.length === 0)) return false;
+        let tempValidVariety = [];
+        for(let i = 0;i < variety.length;i++){
+            const foundVariety = variety_items.find(v => v.name === variety[i]);
+            tempValidVariety[i] = foundVariety !== undefined
+        }
+       setIsValidVariety(tempValidVariety);
+       
+       return !tempValidVariety.some(v => v === false)
     }
 
     const varietyControl = (key) => {
@@ -141,6 +195,7 @@ export default function FarmerOrders ({ navigation }) {
                 inputStyle={styles.inputStyle}
                 labelStyle={styles.labelStyle}
                 placeholderStyle={styles.placeholderStyleAutoComplete}
+                textError={isValidVariety[key] ? "":"Invalid Variety"}
                 textErrorStyle={styles.textErrorStyleAutoComplete}
                 label="Variety/Specification (Type to Search)"
                 placeholder="..."
@@ -231,13 +286,15 @@ export default function FarmerOrders ({ navigation }) {
                 inputStyle={styles.inputStyle}
                 labelStyle={styles.labelStyle}
                 placeholderStyle={styles.placeholderStyleAutoComplete}
+                textError={ isValidFarmer ? "": "This Farmer does not exist" }
                 textErrorStyle={styles.textErrorStyleAutoComplete}
                 label="Farmer (Type to Search)"
                 placeholder="..."
                 placeholderTextColor="gray"
-                onChangeText={e => {
-                    setSelectedFarmer(e);
+                onChangeText={text => {
+                    setSelectedFarmer(text);
                 }}
+                onFocus={() => setIsValidFarmer(true)}
             />   
 
             <AutoComplete
@@ -249,6 +306,7 @@ export default function FarmerOrders ({ navigation }) {
                 inputStyle={styles.inputStyle}
                 labelStyle={styles.labelStyle}
                 placeholderStyle={styles.placeholderStyleAutoComplete}
+                textError={ isValidItem ? "": "This item does not exist" }
                 textErrorStyle={styles.textErrorStyleAutoComplete}
                 label="Item (Type to Search)"
                 placeholder="..."
@@ -256,13 +314,9 @@ export default function FarmerOrders ({ navigation }) {
                 onChangeText={e => {
                     setCropCultivated(e);
                 }}
+                onFocus={() => setIsValidItem(true)}
             />  
 
-                {/* <TextInput label="Item" 
-                    style={styles.input} 
-                    inputStyle={styles.inputStyle}
-                    labelStyle={styles.labelStyle}
-                    onChangeText={setCropCultivated} value={crop_cultivated} /> */}
                 {
                     varietyViewControls && varietyViewControls.map(formControl => formControl)
                 }
@@ -282,8 +336,19 @@ export default function FarmerOrders ({ navigation }) {
                         
                     </TouchableOpacity>
                 </View>
+                
+                <View style={styles.switchInput}>
+                    <Text style={{fontSize: 16}}>Use Percentage Discount</Text>
+                    <Switch
+                        trackColor={{ false: "#767577", true: "#56439D" }}
+                        thumbColor={isDiscountPercentageEnabledEnabled ? "#28166A" : "#f4f3f4"}
+                        onValueChange={toggleSwitch}
+                        value={isDiscountPercentageEnabledEnabled}
+                    />
+                    
+                </View>
 
-                <TextInput label="Discounted Value(UGX)" 
+                <TextInput label={isDiscountPercentageEnabledEnabled ? "Discount Percentage %" : "Discounted Value(UGX)"} 
                     style={styles.input} 
                     inputStyle={styles.inputStyle}
                     labelStyle={styles.labelStyle}
@@ -329,6 +394,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 4,
         marginLeft: -4,
       },
+      switchInput: {
+        flexDirection: "row",
+        marginVertical: 20,
+        justifyContent: "space-between",
+        fontSize: 18
+      },
     submitButtonView: {
         marginVertical: 10
     },
@@ -342,8 +413,7 @@ const styles = StyleSheet.create({
     },
     submitText: {
         color: 'white',
-        textAlign: 'center',
-        fontSize: 18
+        textAlign: 'center'        
     },
     topTitle: {
         marginBottom: 10

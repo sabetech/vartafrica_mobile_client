@@ -62,6 +62,11 @@ export default function CardRecharge({ navigation }) {
             return;
         }
 
+        if (serial_number.length === 0) {
+            Alert.alert("Error", "Serial Number field is empty!");
+            return;
+        }
+
         const rechargeInfo = {
             farmers: farmer.id,
             serial_number
