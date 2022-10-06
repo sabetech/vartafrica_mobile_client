@@ -158,17 +158,17 @@ export default function RegisterFarmer({ navigation }) {
 
         let errMsg ="";
         if(passwordLength===0){
-                errMsg="Password is empty";
+            errMsg="Password is empty";
         }else if(!uppercasePassword){
-                errMsg="At least one Uppercase";
+            errMsg="At least one Uppercase";
         }else if(!lowercasePassword){
-                errMsg="At least one Lowercase";
+            errMsg="At least one Lowercase";
         }else if(!digitsPassword){
-                errMsg="At least one digit";
+            errMsg="At least one digit";
         }else if(!specialCharPassword){
-                errMsg="At least one Special Characters";
+            errMsg="At least one Special Characters";
         }else if(!minLengthPassword){
-                errMsg="At least minumum 8 characters";
+            errMsg="At least minumum 8 characters";
         }else{
             errMsg="";
         }
@@ -268,7 +268,7 @@ export default function RegisterFarmer({ navigation }) {
         <TextInput style={styles.input} 
             inputStyle={styles.inputStyle}
             labelStyle={styles.labelStyle}
-            textError={mobileNumber.length == 9 ? "" : "Phone number is incorrect"}
+            textError={mobileNumber.length == 9 || mobileNumber.length == 0 ? "" : "Phone number is incorrect"}
             textErrorStyle={styles.textErrorStyle}
             keyboardType={'number-pad'}
             onChangeText={(text) => setMobileNumber(text.replace(/[^0-9]/g, ''))} value={mobileNumber} placeholder="000000000" label="Mobile Number" />
@@ -366,7 +366,7 @@ export default function RegisterFarmer({ navigation }) {
         <TextInput style={styles.input} 
             inputStyle={styles.inputStyle}
             labelStyle={styles.labelStyle}
-            textError={next_of_kin_phone.length == 9 ? "" : "Phone number is incorrect"}
+            textError={next_of_kin_phone.length == 9 || next_of_kin_phone.length == 0 ? "" : "Phone number is incorrect"}
             textErrorStyle={styles.textErrorStyle}
             keyboardType={'number-pad'}
             onChangeText={(text) => setMobileNumberOfNextKin(text.replace(/[^0-9]/g, ''))} value={next_of_kin_phone} placeholder="000000000" label="Mobile Number of Next of Kin" />

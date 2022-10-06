@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { appStates, storageKeys } from '../constants';
 import { 
   getDashboardValues, 
+  getSaveDeductValues,
   getFarmersByAgent, 
   getOrdersByAgent, 
   getListOfDeductions,
@@ -51,6 +52,18 @@ export const downloadAppDataToStorage = createAsyncThunk('app/fetchAllRemoteData
 
     return rejectWithValue(err.message());
 
+  }
+});
+
+export const updateLiveDashboardValues = createAsyncThunk('app/fetchSavingsAndDeductions', async (token, { rejectWithValue } ) => {
+  try {
+    const response = await getSaveDeductValues(token);
+    if (response.success) {
+      const { data } = response;
+      return data;
+    }
+  } catch ( err ) {
+    return rejectWithValue(err.message);
   }
 });
 
@@ -373,6 +386,22 @@ export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async
         .addCase(downloadAppDataToStorage.rejected, (state) => {
           state.status = appStates.FAILED
         })
+        .addCase(updateLiveDashboardValues.pending, (state) => {
+          state.status = appStates.LOADING
+        })
+        .addCase(updateLiveDashboardValues.fulfilled, (state, action) => {
+         
+          state.dashboard_values = {
+                                    ...state.dashboard_values, 
+                                    total_savings: action.payload.total_savings,
+                                    total_deductions: action.payload.total_deductions
+                                  };
+          
+          state.status = appStates.APP_READY;
+        })
+        .addCase(updateLiveDashboardValues.rejected, (state) => {
+          state.status = appStates.FAILED
+        })
         .addCase(registerFarmerThunk.pending, (state) => {
           state.status = appStates.LOADING;
         })
@@ -431,7 +460,18 @@ export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async
 
         })
         .addCase(recharge.rejected, (state, action) => {
-          state.status = appStates.RECHARGE_FAILED;
+          state.status = appStates.FAILED;
+          state.error = action.payload;
+        })
+        .addCase(cardsUsed.pending, (state) => {
+          state.status = appStates.LOADING;
+        })
+        .addCase(cardsUsed.fulfilled, (state, action) => {
+          state.cardsUsed = action.payload;
+          state.status = appStates.APP_READY;
+        })
+        .addCase(cardsUsed.rejected, (state, action) => {
+          state.status = appStates.CARD_USED_FAILED;
           state.error = action.payload;
         })
         .addCase(deductionlist.pending, (state) => {
@@ -440,7 +480,6 @@ export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async
         .addCase(deductionlist.fulfilled, (state, action) => {
           state.deductions = action.payload;
           state.status = appStates.APP_READY
-
         })
         .addCase(deductionlist.rejected, (state, action) => {
           state.status = 'failed';

@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { appStates, storageKeys } from '../constants';
-const baseUrl = 'http://vartafrica.com/api/';
+const baseUrl = 'https://vartafrica.com/api/';
 
 class Storage {
 

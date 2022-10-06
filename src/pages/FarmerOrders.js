@@ -41,7 +41,7 @@ export default function FarmerOrders ({ navigation }) {
     const inputRefs = useRef([]);
 
     const toggleSwitch = () => setIsDiscountPercentageEnabled(previousState => !previousState);
-    
+
     useEffect(() => {
         LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
         dispatch(setIdle());
@@ -78,6 +78,12 @@ export default function FarmerOrders ({ navigation }) {
             });
 
     }, [total_price, isDiscountPercentageEnabledEnabled])
+
+    useEffect(() => {
+
+        setIsValidVariety((prev) => [...prev, true]);
+        
+    },[varietyViewControls])
     
     useEffect(() => {
         
@@ -154,9 +160,9 @@ export default function FarmerOrders ({ navigation }) {
             chksum++;
         }
 
-        if (!validateVariety()){
-            chksum++;
-        }
+        // if (!validateVariety()){
+        //     chksum++;
+        // }
 
         if (chksum > 0) return false
         return true;
@@ -175,15 +181,20 @@ export default function FarmerOrders ({ navigation }) {
         if (variety.some(v => v.length === 0)) return false;
         let tempValidVariety = [];
         for(let i = 0;i < variety.length;i++){
-            const foundVariety = variety_items.find(v => v.name === variety[i]);
+            const foundVariety = variety_items.find(v => v.name.trim() === variety[i].trim());
             tempValidVariety[i] = foundVariety !== undefined
         }
-       setIsValidVariety(tempValidVariety);
+       setIsValidVariety([...tempValidVariety]);
        
        return !tempValidVariety.some(v => v === false)
     }
 
     const varietyControl = (key) => {
+        
+        console.log("Is valid varirty: ", isValidVariety[key])
+        console.log("value of key: ", key)
+        console.log("current valid array: ", isValidVariety)
+
         return (
             <View style={styles.varietyControls} key={key}>
                     <AutoComplete
@@ -195,8 +206,8 @@ export default function FarmerOrders ({ navigation }) {
                 inputStyle={styles.inputStyle}
                 labelStyle={styles.labelStyle}
                 placeholderStyle={styles.placeholderStyleAutoComplete}
-                textError={isValidVariety[key] ? "":"Invalid Variety"}
-                textErrorStyle={styles.textErrorStyleAutoComplete}
+                // textError={isValidVariety[key] ? "" : "Invalid Variety"}
+                // textErrorStyle={styles.textErrorStyleAutoComplete}
                 label="Variety/Specification (Type to Search)"
                 placeholder="..."
                 placeholderTextColor="gray"
@@ -255,6 +266,7 @@ export default function FarmerOrders ({ navigation }) {
         setUnitPrice((prev) => removeLastElementAtLastPosition(prev));
         setSeedQty((prev) => removeLastElementAtLastPosition(prev));
         setTotalPrice((prev) => removeLastElementAtLastPosition(prev));
+        setIsValidVariety((prev) => removeLastElementAtLastPosition(prev));
     }
 
     const removeLastElementAtLastPosition = (prev) => prev.filter((_, i) => i < (prev.length - 1));
@@ -352,6 +364,7 @@ export default function FarmerOrders ({ navigation }) {
                     style={styles.input} 
                     inputStyle={styles.inputStyle}
                     labelStyle={styles.labelStyle}
+                    keyboardType={'numeric'}
                     onChangeText={setDisValPerUnit} value={dis_val_per_unit} />
 
                 <TextInput label="Net Order Value (UGX)" 

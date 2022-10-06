@@ -8,15 +8,17 @@
 
  import React, { useContext, useEffect, useState } from 'react';
  import { SafeAreaView, StyleSheet, TextInput, ActivityIndicator, View, Text, TouchableOpacity, Image, Alert } from 'react-native';
+ import { TextInput as Ti} from 'react-native-element-textinput';
  import { AuthContext } from '../context/AuthContext';
  import { login } from '../services/api';
 import Storage from '../services/storage';
+const appColor = "#000b6e";
 
  export default function Login ({ navigation }) {
 
     const { user, setUser } = useContext(AuthContext);
-    const [username, onChangeUsername] = useState('testagent@gmail.com');
-    const [password, onChangePassword] = useState('Greatminds1@');
+    const [username, onChangeUsername] = useState('');
+    const [password, onChangePassword] = useState('');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -38,7 +40,7 @@ import Storage from '../services/storage';
      if (loggedUser.success){
         await setUser(loggedUser);
         Storage.storeUser(loggedUser);
-        console.log(loggedUser)
+        
         setLoading((prev) => false);
         navigation.navigate('Dashboard');
      } else {
@@ -61,51 +63,63 @@ import Storage from '../services/storage';
  }
 
      return (
-         <SafeAreaView>
+         <SafeAreaView style={styles.background}>
              <View style={styles.topView}>
                 <Image
                     style={styles.tinyLogo}
-                    source={ require('../assets/logo_simple.png') }
+                    source={ require('../assets/vart_logo_white.png') }
                 />
                  
              </View>
             <TextInput style={styles.input} onChangeText={onChangeUsername} value={username} placeholder="Username"/>
-            <TextInput
-                style={styles.input}
+            <Ti
+                style={styles.passwordInput}
                 onChangeText={onChangePassword}
                 value={password}
+                placeholderTextColor='#cccccc'
                 placeholder="Password"
                 secureTextEntry={true}
             />
             <TouchableOpacity style={styles.submitButton} onPress={signIn}>
                 {
                     loading ? 
-                    <ActivityIndicator color={'white'} /> : <Text style={ styles.submitText }>Sign In</Text>
+                    <ActivityIndicator color={'white'} /> : <Text style={ styles.submitText }>Sign IN</Text>
                 }
             </TouchableOpacity>
-            
+            <Text style={styles.tagline}>A Passion for Problem Solving</Text>
         </SafeAreaView>
          );
  }
 
  const styles = StyleSheet.create({
-    loader: {
-
+    background: {
+        height: '100%',
+        backgroundColor: appColor
     },
      input: {
      height: 40,
      margin: 12,
      borderWidth: 1,
      padding: 10,
-     borderRadius: 10
+     borderRadius: 10,
+     backgroundColor: 'white',
+     color: 'black'
      },
+     passwordInput:{
+        backgroundColor: 'white',
+        borderRadius: 10,
+        borderWidth: 1,
+        height: 40,
+        margin: 12,
+        paddingHorizontal: 10
+     }, 
      submitButton:{
         display: 'flex',
         justifyContent: 'center',
         alignContent: 'center',
         height: 50,
         marginTop: 40,
-        backgroundColor: '#28166A',
+        backgroundColor: 'red',
         margin: 12,
         borderRadius: 10
     },
@@ -122,15 +136,19 @@ import Storage from '../services/storage';
          fontSize: 32
      },
      tinyLogo: {
-        width: 150,
-        height: 150,
+        width: 250,
+        height: 80,
         justifyContent: 'center',
         alignSelf: 'center'
+      },
+      tagline: {
+        alignSelf: 'center',
+        color: 'white',
+        marginVertical: 100
       },
      submitText: {
         alignSelf: 'center',
         color: 'white'
      }
-
  });
 

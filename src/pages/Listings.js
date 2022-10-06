@@ -11,6 +11,7 @@ import { getAllRegisteredFarmers,
         deductionlist,
         getStatus, setIdle } from '../redux/vartafrica';
 import { appStates } from "../constants";
+const appColor = "#000b6e";
 
 export default function Listings ({ route, navigation }) {
     const [ data, setData ] = useState([]);
@@ -25,7 +26,11 @@ export default function Listings ({ route, navigation }) {
 
     const { title } = route.params;    
     useEffect(() => {
-        navigation.setOptions({headerTitle: title, headerShown: true});
+        navigation.setOptions({headerTitle: title, headerShown: true, headerStyle: {
+            backgroundColor: appColor
+          }, headerTitleStyle: {
+            color: '#fff'
+          }, headerTintColor: '#fff'});
     }, []);
 
     useEffect(() => {
@@ -66,9 +71,9 @@ export default function Listings ({ route, navigation }) {
                 }
             break;
             case 'Cards Used':
-                dispatch(cardsUsed())
+                
                 if (status === appStates.APP_READY) {
-                    setData((prev) => [...prev, ...cardsUsedList.map(
+                    setData((prev) => [...cardsUsedList.map(
                         cardsUsedListItem => (
                             {
                                 title: cardsUsedListItem.used_by,
@@ -81,7 +86,7 @@ export default function Listings ({ route, navigation }) {
             case 'List of Deductions':
             
                 if (status === appStates.APP_READY) {
-                    setData((prev) => [...prev, ...deductions.map(
+                    setData((prev) => [...deductions.map(
                         deduction => ({
                             title: deduction.username,
                             subTitle: deduction.amount
@@ -98,6 +103,7 @@ export default function Listings ({ route, navigation }) {
                 data.length > 0 ? 
                 <FlatList 
                     data={data}
+                    inverted={true}
                     renderItem={
                         ({item}) => <View style={styles.listItem}>
                                         <View style={styles.content}>
@@ -112,7 +118,6 @@ export default function Listings ({ route, navigation }) {
                     <Text style={styles.noDataText}>{title} has no data.</Text>
                 </View>
             }
-            
         </View>
     )
 }
@@ -129,19 +134,20 @@ const styles = StyleSheet.create({
     },
     item: {
       fontSize: 18,
+      color: appColor
     },
     itemRight:{
         fontSize: 15,
+        color: appColor
     },
     listItem: {
         justifyContent: 'space-between',
         borderRadius: 10,
         height: 70,
-        // borderWidth: 1,
         marginHorizontal: 15,
         marginVertical: 5,
-        backgroundColor: 'white',
-        elevation: 5
+        backgroundColor: 'white'
+        
 
     },
     noDataStyle: {

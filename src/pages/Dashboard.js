@@ -5,7 +5,7 @@ import {useNetInfo} from "@react-native-community/netinfo";
 import DashboardCard from "../components/DashboardCard";
 import { FloatingAction } from "react-native-floating-action";
 import { AuthContext } from "../context/AuthContext";
-import { downloadAppDataToStorage, getAllDashboardValues, getStatus, getSyncState, getSyncSuccess, setAppNotReady, syncAll } from '../redux/vartafrica';
+import { downloadAppDataToStorage, updateLiveDashboardValues, getAllDashboardValues, getStatus, getSyncState, getSyncSuccess, setAppNotReady, syncAll } from '../redux/vartafrica';
 import MainMenuItem from "../components/MainMenuButton";
 import Storage from "../services/storage";
 import { appStates } from "../constants";
@@ -37,6 +37,14 @@ export default function Dashboard ({ navigation }) {
             
         } 
     }, [dispatch, status]);
+
+    useEffect(() => {
+        
+        if (netInfo.isConnected) {
+            dispatch(updateLiveDashboardValues(user.token));
+        }
+
+    }, [isFocused]);
 
     const logout = () => {
         setUser(null);

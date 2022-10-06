@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseUrl = 'http://vartafrica.com/api/';
+const baseUrl = 'https://vartafrica.com/api/';
 export const login = async ({username, password}) => {
     try{
         const response = await fetch(`${baseUrl}sign_in`, {
@@ -216,6 +216,24 @@ export const getListOfvariety = async (token) => {
 
 
     } catch ( err ) {
+        throw new Error(err.message());
+    }
+}
+
+export const getSaveDeductValues = async (token) => {
+    try {
+            
+        const response = await axios({
+            url: `${baseUrl}dashboardSavDeduct`,
+            method: 'GET',
+            mode:'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': token
+            }
+        });
+        return response.data;
+    }catch( err ) {
         throw new Error(err.message());
     }
 }

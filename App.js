@@ -13,7 +13,7 @@ import CardRecharge from "./src/pages/CardRecharge";
 import FarmerOrders from "./src/pages/FarmerOrders";
 import Listings from "./src/pages/Listings";
 import { AuthContext } from "./src/context/AuthContext";
-
+const appColor = "#000b6e";
 if(__DEV__) {
   import('./ReactotronConfig').then(() => console.log('Reactotron Configured'))
 }
@@ -52,20 +52,40 @@ function App () {
                     <Stack.Screen name="Dashboard" component={ Dashboard } />
                     <Stack.Screen name="RegisterFarmer" component={ RegisterFarmer } options={{
                                   headerShown: true, 
-                                  headerTitle:"Register Farmer"
+                                  headerTitle:"Register Farmer",
+                                  headerStyle: {
+                                    backgroundColor: appColor
+                                  }, headerTitleStyle: {
+                                    color: '#fff'
+                                  }, headerTintColor: '#fff'
                                                 }} />
 
                     <Stack.Screen name="FarmerOrders" component={ FarmerOrders } options={{
                                   headerShown: true, 
-                                  headerTitle:"Farmer Order"
+                                  headerTitle:"Farmer Order",
+                                  headerStyle: {
+                                    backgroundColor: appColor
+                                  }, headerTitleStyle: {
+                                    color: '#fff'
+                                  }, headerTintColor: '#fff'
                                                 }} />
                     <Stack.Screen name="NewFarmerDebit" component={ NewFarmerDebit } options={{
                                   headerShown: true, 
-                                  headerTitle:"New Farmer Debit"
+                                  headerTitle:"New Farmer Debit",
+                                  headerStyle: {
+                                    backgroundColor: appColor
+                                  }, headerTitleStyle: {
+                                    color: '#fff'
+                                  }, headerTintColor: '#fff'
                                                 }} />
                     <Stack.Screen name="CardRecharge" component={ CardRecharge } options={{
                                   headerShown: true, 
-                                  headerTitle:"Card Recharge"
+                                  headerTitle:"Card Recharge",
+                                  headerStyle: {
+                                    backgroundColor: appColor
+                                  }, headerTitleStyle: {
+                                    color: '#fff'
+                                  }, headerTintColor: '#fff'
                                                 }}/>
                     <Stack.Screen name="Listings" component={ Listings } />
                   </>

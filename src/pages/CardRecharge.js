@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, AppState } from "react-native";
 import { useDispatch, useSelector } from 'react-redux'; 
 import { TextInput } from "react-native-element-textinput";
 import { AutoComplete } from 'react-native-element-textinput';
@@ -17,7 +17,7 @@ import { appStates } from "../constants";
 
 export default function CardRecharge({ navigation }) {
     const [farmers, setSelectedFarmer] = useState();
-    const [serial_number, setSerialNumber] = useState();
+    const [serial_number, setSerialNumber] = useState("");
     const [phone, setPhone] = useState();
 
     const registeredFarmers = useSelector(getAllRegisteredFarmers);
@@ -123,7 +123,9 @@ export default function CardRecharge({ navigation }) {
             
                 <View style={styles.submitButtonView}>
                     <TouchableOpacity style={styles.submitButton} onPress={() => submitCardRechargeInfo()}>
-                        <Text style={ styles.submitText }>Submit</Text>
+                        {
+                            status === AppState.RECHARGE_SAVING ? <ActivityIndicator /> : <Text style={ styles.submitText }>Submit</Text>
+                        }
                     </TouchableOpacity>
                 </View>
             </View>

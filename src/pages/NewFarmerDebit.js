@@ -44,13 +44,13 @@ export default function NewFarmerDebit({ navigation }) {
             navigation.navigate('Dashboard');
            
         }
-
-        if (status === appStates.DEBIT_FAILED, [
-            { text: "OK", onPress: () => {
-                dispatch(setIdle())
-            } }
-          ]) {
-            Alert.alert('Failure', errormsg);
+        
+        if (status === appStates.DEBIT_FAILED){
+            Alert.alert('Failure', errormsg, [
+                { text: "OK", onPress: () => {
+                    dispatch(setIdle())
+                } }
+              ]);
         }
        
     }, [dispatch, status]);
