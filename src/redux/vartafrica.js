@@ -460,7 +460,7 @@ export const syncParticularKey = createAsyncThunk('app/syncParticularKey', async
 
         })
         .addCase(recharge.rejected, (state, action) => {
-          state.status = appStates.FAILED;
+          state.status = appStates.RECHARGE_FAILED;
           state.error = action.payload;
         })
         .addCase(cardsUsed.pending, (state) => {
