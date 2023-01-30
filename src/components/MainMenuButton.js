@@ -25,17 +25,18 @@ const styles =  StyleSheet.create({
     },
     textStyle: {
         textAlign: "center",
-        color: "white",
+        color: "black",
+        fontSize: 16,
         alignItems: "center",
         justifyContent: "center"
     },
     buttonStyle: {
         elevation: 8,
-        backgroundColor: "#112233",
+        backgroundColor: "#fff",
         borderRadius: 10,
         paddingVertical: 20,
         paddingHorizontal: 12,
-        height: 80,
+        height: 60,
         width: '100%',
         marginVertical: 15        
     }

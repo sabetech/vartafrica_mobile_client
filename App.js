@@ -39,7 +39,7 @@ function App () {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <AuthContext.Provider value={{user, setUser}}>
-          {/* <ThemeContext.Provider value={appColor}> */}
+          <ThemeContext.Provider value={{ appColor }}>
           <NavigationContainer>
             <Stack.Navigator screenOptions={{
                                 headerShown: false
@@ -96,7 +96,7 @@ function App () {
                 
               </Stack.Navigator>
           </NavigationContainer>
-          {/* </ThemeContext.Provider> */}
+          </ThemeContext.Provider>
         </AuthContext.Provider>
       </PersistGate>
     </Provider>

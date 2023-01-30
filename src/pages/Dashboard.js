@@ -5,6 +5,7 @@ import {useNetInfo} from "@react-native-community/netinfo";
 import DashboardCard from "../components/DashboardCard";
 import { FloatingAction } from "react-native-floating-action";
 import { AuthContext } from "../context/AuthContext";
+import { ThemeContext } from "../context/ThemeContext";
 import { downloadAppDataToStorage, updateLiveDashboardValues, getAllDashboardValues, getStatus, getSyncState, getSyncSuccess, setAppNotReady, syncAll } from '../redux/vartafrica';
 import MainMenuItem from "../components/MainMenuButton";
 import Storage from "../services/storage";
@@ -19,6 +20,7 @@ export default function Dashboard ({ navigation }) {
     const sync_success = useSelector(getSyncSuccess);
     const dispatch = useDispatch();
     const { user, setUser } = useContext(AuthContext);
+    const { appColor } = useContext(ThemeContext);
     const isFocused = useIsFocused();
     const netInfo = useNetInfo();
 
@@ -79,7 +81,7 @@ export default function Dashboard ({ navigation }) {
         }
       ]
     return( 
-        <SafeAreaView style={{padding: 10}}>
+        <SafeAreaView style={{padding: 10, height:'100%', backgroundColor: appColor}}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <TouchableOpacity
                     style={{...styles.sync, backgroundColor: (sync_success ? 'green':'red')} }
@@ -88,23 +90,24 @@ export default function Dashboard ({ navigation }) {
                     {
                         ( sync_state == appStates.SYNCING ) ? <ActivityIndicator color={'white'} size={'large'}/> : <Text style={styles.syncText}>Sync</Text>
                     } 
-                </TouchableOpacity><Text>
+                </TouchableOpacity>
+                <Text style={{color: 'white'}}>
                     {                        
                         (sync_state == appStates.SYNCING ) ? "Syncing ..." : sync_success ? "Synced" : "Sync Failed! Network Issues!"
                     }
-                    </Text>
+                </Text>
             </View>
             <View>
                 {
-                    (status === appStates.LOADING) && (<View><Text>Loading... Plese wait!</Text><ActivityIndicator /></View>) 
-                    || <Text>Connection: { netInfo.type.toUpperCase() } {netInfo.isConnected?"ONLINE":"OFFLINE"}</Text>   
+                    (status === appStates.LOADING) && (<View><Text style={{color: 'white'}}>Loading... Plese wait!</Text><ActivityIndicator /></View>) 
+                    || <Text style={{color: 'white'}}>Connection: { netInfo.type.toUpperCase() } {netInfo.isConnected?"ONLINE":"OFFLINE"}</Text>   
                 }   
             </View>
-            <View>
+            <View style={{marginTop: 20}}>
                 <View style={styles.dashboardlist}>
-                    <DashboardCard title={"Number of Registered Farmers"} value={dashboardValues?.farmer_count || "..." } />
-                    <DashboardCard title={"Quantity of Orders"} value={dashboardValues?.total_orders || "..." } />
-                    <DashboardCard title={"Total Savings"} value={dashboardValues?.total_savings || "..." } />
+                    <DashboardCard title={"Farmers"} value={dashboardValues?.farmer_count || "..." } />
+                    <DashboardCard title={"Orders"} value={dashboardValues?.total_orders || "..." } />
+                    <DashboardCard title={"Savings"} value={dashboardValues?.total_savings || "..." } />
                     <DashboardCard title={"Deductions"} value={dashboardValues?.total_deductions || "..." } />
                 </View>
                 
@@ -112,9 +115,12 @@ export default function Dashboard ({ navigation }) {
                     <MainMenuItem title={"List Farmers"} addNewLink={'RegisterFarmer'} navigation={navigation} />
                     <MainMenuItem title={"List Orders"} addNewLink={'FarmerOrders'} navigation={navigation} />
                     <MainMenuItem title={"Cards Used"} addNewLink={'CardRecharge'} navigation={navigation} />
-                    <MainMenuItem title={"List of Deductions"} addNewLink={'NewFarmerDebit'} navigation={navigation} />
+                    <MainMenuItem title={"Deductions"} addNewLink={'NewFarmerDebit'} navigation={navigation} />
                 </View>
             </View>
+            
+            <Text style={styles.tagline}>A Passion for Problem Solving</Text>
+
             <FloatingAction
                 actions={actions}
                 onPressItem={name => {
@@ -137,9 +143,9 @@ export default function Dashboard ({ navigation }) {
                     }
                 }}
             />
-            <View>
+            <View style={[{...styles.logout, backgroundColor: (sync_success?"#A82F15":"grey")}]}>            
                 <TouchableOpacity
-                    style={styles.logout}
+                    
                     onPress={() => {
                         if (sync_success)
                             logout()
@@ -157,7 +163,7 @@ export default function Dashboard ({ navigation }) {
                             ]);
                         }}
                     >
-                    <Text style={[styles.logoutText, {backgroundColor: (sync_success?"#A82F15":"grey")}]}>Logout</Text>
+                    <Text style={[styles.logoutText]}>Logout</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -183,11 +189,9 @@ const styles = StyleSheet.create({
 
     },
     logout: {
-        alignSelf: 'center',
-        // backgroundColor: '#A82F15',        
-        borderRadius: 10,
-        width: '80%',
-        zIndex: -1
+        alignSelf: 'center',       
+        borderRadius: 50,
+        width: '40%',
     },
     logoutText: {
         color: 'white',
@@ -209,6 +213,10 @@ const styles = StyleSheet.create({
     },
     statusStyle: {
         textAlign: 'center'
+    },
+    tagline: {
+        color: 'white',
+        textAlign: 'center',
+        marginBottom: 20
     }
-
 });

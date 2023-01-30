@@ -14,7 +14,7 @@ const DashboardCard = ({ title, value }) => {
 const styles = StyleSheet.create({
     cardStyle : {
         width: '40%',
-        height: 120,
+        height: 90,
         elevation: 3,
         marginHorizontal: 5,
         marginVertical: 10,
@@ -22,17 +22,19 @@ const styles = StyleSheet.create({
         flexDirection: 'column',        
         justifyContent: 'center',
         alignContent: 'center',
-        backgroundColor: 'white'
+        backgroundColor: '#01084a'
 
     },
     titleText: {
         textAlign: 'center',
-        fontSize: 12,
-        fontFamily: 'Roboto'
+        fontSize: 18,
+        fontFamily: 'Roboto',
+        color: 'white'
     },
     valueText: {
-        fontSize: 18,
-        textAlign: 'center'
+        fontSize: 21,
+        textAlign: 'center',
+        color: 'yellow'
     }
 })
 

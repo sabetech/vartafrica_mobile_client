@@ -24,6 +24,7 @@ const appColor = "#000b6e";
 
     useEffect(() => {
         let isSubscribed = true
+        if (isSubscribed)
         if (user != null) navigation.navigate('Dashboard');
 
         return (() =>{
