@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, SafeAreaVi
 import { TextInput, AutoComplete } from 'react-native-element-textinput';
 import Geolocation from 'react-native-geolocation-service';
 import { AuthContext } from "../context/AuthContext";
+import { ThemeContext } from "../context/ThemeContext";
 import { useDispatch, useSelector } from 'react-redux';
 import { registerFarmerThunk, getStatus, setIdle, syncParticularKey } from '../redux/vartafrica';
 import { Picker } from '@react-native-picker/picker';
@@ -16,6 +17,7 @@ import { LogBox } from 'react-native';
 
 export default function RegisterFarmer({ navigation }) {
     const { user } = useContext(AuthContext);
+    const { appColor } = useContext(ThemeContext); 
     const [first_name, setFirstname] = useState("");
     const [last_name, setLastname] = useState("");
     const [user_name, setUsername] = useState("");
@@ -226,10 +228,9 @@ export default function RegisterFarmer({ navigation }) {
     }
 
     return (
-        <SafeAreaView style={{flex: 1}}>
+        <SafeAreaView style={{flex: 1, backgroundColor: appColor}}>
             
         <View style={{padding: 10, flex: 1}}>
-        <Text >Register Farmer</Text>
         <ScrollView>
         <TextInput style={ styles.input } 
                     inputStyle={styles.inputStyle}
@@ -273,13 +274,14 @@ export default function RegisterFarmer({ navigation }) {
             keyboardType={'number-pad'}
             onChangeText={(text) => setMobileNumber(text.replace(/[^0-9]/g, ''))} value={mobileNumber} placeholder="000000000" label="Mobile Number" />
 
-        <Text>Select Sex</Text>
+        <Text style={{color: 'white'}}>Select Sex</Text>
         <Picker
             prompt={"Choose Sex"}
             selectedValue={sex}
             onValueChange={(itemValue, itemIndex) =>
                 setSex(itemValue)
             }
+            style={{backgroundColor: 'white'}}
         >
         <Picker.Item label="Male" value="male" />
         <Picker.Item label="Female" value="female" />
@@ -376,37 +378,41 @@ export default function RegisterFarmer({ navigation }) {
             labelStyle={styles.labelStyle}
             onChangeText={(text) => setLandarea(text)} value={land_area} placeholder="132" label="Land Area" />
 
-        <Text>Fertilizer</Text>
+        <Text style={{color: 'white'}}>Fertilizer</Text>
         <Picker
             prompt={"Fertilizer"}
             selectedValue={fertilizer}
             onValueChange={(itemValue, itemIndex) =>
                 setFertilizer(itemValue)
             }
+            style={{color: 'black', backgroundColor: 'white'}}
         >
             <Picker.Item label="Yes" value="yes" />
             <Picker.Item label="No" value="no" />
         </Picker>
 
-        <Text>Disabled?</Text>
+        <Text style={{color: 'white'}}>Disabled?</Text>
         <Picker
             prompt={"Disabled?"}
             selectedValue={disability_status}
             onValueChange={(itemValue, itemIndex) =>
                 setDisabilityStatus(itemValue)
             }
+            style={{backgroundColor: 'white', color: 'white'}}
+
         >
         <Picker.Item label="Yes" value="yes" />
         <Picker.Item label="No" value="no" />
         </Picker>
 
-        <Text>Mechanization Needed</Text>
+        <Text style={{color: 'white'}}>Mechanization Needed</Text>
         <Picker
             prompt={"Mechanization Needed"}
             selectedValue={mechanization_needed}
             onValueChange={(itemValue, itemIndex) =>
                 setMechanizationNeeded(itemValue)
             }
+            style={{backgroundColor: 'white', color: 'black'}}
         >
         <Picker.Item label="Yes" value="yes" />
         <Picker.Item label="No" value="no" />
@@ -425,8 +431,8 @@ export default function RegisterFarmer({ navigation }) {
             value={password} placeholder="your password ..." label="Password of Farmer"
             secureTextEntry
             />
-    <Text>Longitude: {longitude}</Text>
-    <Text>Latitude: {latitude}</Text>
+    <Text style={{color: 'white'}}>Longitude: {longitude}</Text>
+    <Text style={{color: 'white'}}>Latitude: {latitude}</Text>
     <View style={styles.submitButtonView}>
         <TouchableOpacity style={styles.submitButton} onPress={() => handleSubmitRegister()}>
             <Text style={ styles.submitText }>Submit</Text>
@@ -446,6 +452,7 @@ const styles = StyleSheet.create({
       borderWidth: 0.5,
       borderColor: '#DDDDDD',
       marginVertical: 10,
+      backgroundColor: 'white'
     },
     inputStyle: { 
         fontSize: 16,
@@ -470,9 +477,12 @@ const styles = StyleSheet.create({
         display: 'flex',
         justifyContent: 'center',
         alignContent: 'center',
+        alignSelf: 'center',
         height: 50,
         marginTop: 40,
-        backgroundColor: '#112233'
+        backgroundColor: 'red',
+        width: '50%',
+        borderRadius: 30,
     },
     submitText: {
         color: 'white',
@@ -498,7 +508,7 @@ const styles = StyleSheet.create({
       },
       inputStyleAutoComplete: { fontSize: 16 },
       labelStyleAutoComplete: { fontSize: 14 },
-      placeholderStyleAutoComplete: { fontSize: 16 },
+      placeholderStyleAutoComplete: { fontSize: 16, color: 'gray' },
       textErrorStyleAutoComplete: { fontSize: 16 },
 
 });

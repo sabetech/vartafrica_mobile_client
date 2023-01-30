@@ -2,7 +2,8 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, TextInput as Ti, Switch} from "react-native";
 import { useDispatch, useSelector } from 'react-redux'; 
 import { TextInput, AutoComplete } from "react-native-element-textinput";
-import { AuthContext } from "../context/AuthContext"
+import { AuthContext } from "../context/AuthContext";
+import { ThemeContext } from "../context/ThemeContext";
 import { getAllRegisteredFarmers, 
          getStatus, 
          setIdle,
@@ -29,6 +30,7 @@ export default function FarmerOrders ({ navigation }) {
     const [net_order_value, setnetOrderValue] = useState(0);
     const [varietyViewControls, setVarietyView] = useState([]);
     const [isDiscountPercentageEnabledEnabled, setIsDiscountPercentageEnabled] = useState(false);
+    const { appColor } = useContext(ThemeContext);
     
 
     const dispatch = useDispatch();

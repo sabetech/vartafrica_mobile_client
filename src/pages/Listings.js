@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import { useDispatch, useSelector } from 'react-redux'; 
 import { AuthContext } from "../context/AuthContext"
+import { ThemeContext } from "../context/ThemeContext"
 import { useIsFocused } from "@react-navigation/native";
 import { getAllRegisteredFarmers, 
         getAllFarmerOrders, 
@@ -11,7 +12,6 @@ import { getAllRegisteredFarmers,
         deductionlist,
         getStatus, setIdle } from '../redux/vartafrica';
 import { appStates } from "../constants";
-const appColor = "#000b6e";
 
 export default function Listings ({ route, navigation }) {
     const [ data, setData ] = useState([]);
@@ -21,6 +21,7 @@ export default function Listings ({ route, navigation }) {
     const cardsUsedList = useSelector(getAllCardsUsed);
     const status = useSelector(getStatus);
     const { user } = useContext(AuthContext);
+    const {appColor} = useContext(ThemeContext);
     const isFocused = useIsFocused();
     const dispatch = useDispatch();
 
@@ -98,7 +99,7 @@ export default function Listings ({ route, navigation }) {
     },[status]);
 
     return (
-        <View>
+        <View style={{backgroundColor: appColor}}>
             {
                 data.length > 0 ? 
                 <FlatList 
@@ -158,6 +159,7 @@ const styles = StyleSheet.create({
         alignContent: 'center'
     },
     noDataText: {
-        textAlign: 'center'        
+        textAlign: 'center',
+        color: 'white'
     }
   });
