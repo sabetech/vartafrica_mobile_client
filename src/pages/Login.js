@@ -10,13 +10,14 @@
  import { SafeAreaView, StyleSheet, TextInput, ActivityIndicator, View, Text, TouchableOpacity, Image, Alert } from 'react-native';
  import { TextInput as Ti} from 'react-native-element-textinput';
  import { AuthContext } from '../context/AuthContext';
+import { ThemeContext } from '../context/ThemeContext';
  import { login } from '../services/api';
 import Storage from '../services/storage';
 const appColor = "#000b6e";
-
  export default function Login ({ navigation }) {
 
     const { user, setUser } = useContext(AuthContext);
+
     const [username, onChangeUsername] = useState('');
     const [password, onChangePassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -69,7 +70,10 @@ const appColor = "#000b6e";
                     style={styles.tinyLogo}
                     source={ require('../assets/vart_logo_white.png') }
                 />
-                 
+                <Image
+                    style={styles.profileIcon}
+                    source={ require('../assets/user.png') }
+                />
              </View>
             <TextInput style={styles.input} onChangeText={onChangeUsername} value={username} placeholder="Username"/>
             <Ti
@@ -80,13 +84,14 @@ const appColor = "#000b6e";
                 placeholder="Password"
                 secureTextEntry={true}
             />
+            <Text style={styles.tagline}>A Passion for Problem Solving</Text>
             <TouchableOpacity style={styles.submitButton} onPress={signIn}>
                 {
                     loading ? 
-                    <ActivityIndicator color={'white'} /> : <Text style={ styles.submitText }>Sign IN</Text>
+                    <ActivityIndicator color={'white'} /> : <Text style={ styles.submitText }>Login</Text>
                 }
             </TouchableOpacity>
-            <Text style={styles.tagline}>A Passion for Problem Solving</Text>
+            
         </SafeAreaView>
          );
  }
@@ -117,19 +122,21 @@ const appColor = "#000b6e";
         display: 'flex',
         justifyContent: 'center',
         alignContent: 'center',
+        alignSelf: 'center',
         height: 50,
-        marginTop: 40,
+        marginTop: 20,
         backgroundColor: 'red',
         margin: 12,
-        borderRadius: 10
+        borderRadius: 50,
+        width: '40%'
     },
      topView: {
-         height: 100,
+         height: 150,
          display: 'flex',
          justifyContent: 'center',
          alignContent: 'center',
-         marginBottom: 100,
-         marginTop: 50
+         marginBottom: 60,
+         marginTop: 140
      },
      text: {
          alignSelf: 'center',
@@ -141,10 +148,17 @@ const appColor = "#000b6e";
         justifyContent: 'center',
         alignSelf: 'center'
       },
+      profileIcon: {
+        marginTop: 40,
+        width: 100,
+        height: 110,
+        justifyContent: 'center',
+        alignSelf: 'center'
+      },
       tagline: {
         alignSelf: 'center',
         color: 'white',
-        marginVertical: 100
+        marginVertical: 10
       },
      submitText: {
         alignSelf: 'center',

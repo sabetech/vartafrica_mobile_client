@@ -13,7 +13,8 @@ import CardRecharge from "./src/pages/CardRecharge";
 import FarmerOrders from "./src/pages/FarmerOrders";
 import Listings from "./src/pages/Listings";
 import { AuthContext } from "./src/context/AuthContext";
-const appColor = "#000b6e";
+import { ThemeContext } from "./src/context/ThemeContext";
+
 if(__DEV__) {
   import('./ReactotronConfig').then(() => console.log('Reactotron Configured'))
 }
@@ -22,7 +23,7 @@ const Stack = createNativeStackNavigator();
 
 function App () {
   const [ user, setUser ] = useState(null);
-
+  const appColor = "#000b6e";
   useEffect(() => {
     //check for already logged user
     (async function getSavedUser() {
@@ -38,6 +39,7 @@ function App () {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <AuthContext.Provider value={{user, setUser}}>
+          {/* <ThemeContext.Provider value={appColor}> */}
           <NavigationContainer>
             <Stack.Navigator screenOptions={{
                                 headerShown: false
@@ -94,6 +96,7 @@ function App () {
                 
               </Stack.Navigator>
           </NavigationContainer>
+          {/* </ThemeContext.Provider> */}
         </AuthContext.Provider>
       </PersistGate>
     </Provider>
