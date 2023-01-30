@@ -107,8 +107,8 @@ export default function Listings ({ route, navigation }) {
                     renderItem={
                         ({item}) => <View style={styles.listItem}>
                                         <View style={styles.content}>
-                                            <Text style={styles.item}>{item.title}</Text>
-                                            <Text style={styles.itemRight}>{item.subTitle}</Text>
+                                            <Text style={styles.item}>{item.title} </Text>
+                                            <Text style={styles.itemRight}> {item.subTitle} </Text>
                                         </View>
                                     </View>
                     }
@@ -128,22 +128,24 @@ const styles = StyleSheet.create({
      paddingTop: 22
     },
     content: {
-        marginHorizontal: 20,
-        justifyContent: 'center',
+        display: 'flex',
+        flexDirection: 'row',
+        marginHorizontal: 40,
+        justifyContent: 'space-between',
         marginTop: 10
     },
     item: {
-      fontSize: 18,
-      color: appColor
+      fontSize: 15,
+      color: 'black'
     },
     itemRight:{
         fontSize: 15,
-        color: appColor
+        color: 'black'
     },
     listItem: {
         justifyContent: 'space-between',
         borderRadius: 10,
-        height: 70,
+        height: 40,
         marginHorizontal: 15,
         marginVertical: 5,
         backgroundColor: 'white'

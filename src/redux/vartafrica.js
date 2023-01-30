@@ -16,7 +16,6 @@ import Storage from '../services/storage';
 import { uuidv4 } from '../utils';
 
 export const downloadAppDataToStorage = createAsyncThunk('app/fetchAllRemoteData', async (token, { rejectWithValue} ) => {
-  
   try{
     const dashboardVals = await fetchDashboardValuesFromServer(token);
     const farmers = await fetchFarmersFromServer(token);

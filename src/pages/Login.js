@@ -42,14 +42,13 @@ const appColor = "#000b6e";
      if (loggedUser.success){
         await setUser(loggedUser);
         Storage.storeUser(loggedUser);
-        
         setLoading((prev) => false);
         navigation.navigate('Dashboard');
      } else {
         Alert.alert("Failure", "Login Failed", [
             { text: "OK", onPress: () => {
                 setLoading(prev => false);
-            } }
+            }}
         ])
      }
      

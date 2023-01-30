@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect, useContext } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useDispatch, useSelector } from 'react-redux'; 
 import { TextInput, AutoComplete } from "react-native-element-textinput";
 import { AuthContext } from "../context/AuthContext"
+import { ThemeContext } from "../context/ThemeContext"
 import { 
     getAllRegisteredFarmers, 
     getStatus, 
@@ -23,6 +25,7 @@ export default function NewFarmerDebit({ navigation }) {
     const errormsg = useSelector(getError);
     const responseMsg = useSelector(getSuccessMsg);
     const { user } = useContext(AuthContext);
+    const { appColor } = useContext(ThemeContext);
     
     const dispatch = useDispatch();
 
@@ -36,7 +39,7 @@ export default function NewFarmerDebit({ navigation }) {
        
         if (status === appStates.DEBIT_SAVED){
 
-            Alert.alert('Success', responseMsg,  [
+            Alert.alert('Success', responseMsg, [
                 { text: "OK", onPress: () => {
                     dispatch(setIdle())
                 } }
@@ -90,14 +93,14 @@ export default function NewFarmerDebit({ navigation }) {
     }
 
     return (
-        <View style={{padding: 10, flex: 1}}>
-            <Text style={styles.topTitle}>Farmer Debit</Text>
-            <Text>Select Farmer</Text>
+    <View style={{padding: 10, flex: 1, backgroundColor: appColor}}>
+        <View style={{marginTop: '50%'}}>
+            <Text style={{color: 'white'}}>Select Farmer</Text>
             {
                 (status === 'loading') ? <ActivityIndicator /> 
                 :
                 registeredFarmers.length == 0 ? 
-                <Text style={{textAlign:'center'}}>
+                <Text style={{textAlign:'center', color:'white'}}>
                     You have no farmers available. {'\n'}
                     Add a farmer from the 
                     <Text style={{color: 'blue'}}
@@ -114,7 +117,7 @@ export default function NewFarmerDebit({ navigation }) {
                 style={styles.input}
                 inputStyle={styles.inputStyle}
                 labelStyle={styles.labelStyle}
-                placeholderStyle={styles.placeholderStyleAutoComplete}
+                placeholderStyle={styles.placeholderStyle}
                 textErrorStyle={styles.textErrorStyleAutoComplete}
                 label="Farmer (Type to Search)"
                 placeholder="..."
@@ -128,6 +131,7 @@ export default function NewFarmerDebit({ navigation }) {
                 style={styles.input} 
                 inputStyle={styles.inputStyle}
                 labelStyle={styles.labelStyle}
+                placeholderStyle={styles.placeholderStyle}
                 label="Amount (UGX)"
                 onChangeText={setAmount} value={amount} />
             
@@ -136,10 +140,11 @@ export default function NewFarmerDebit({ navigation }) {
                         <Text style={ styles.submitText }>Submit</Text>
                     </TouchableOpacity>
                 </View>
-                </View>
+            </View>
             }
             
         </View>
+    </View>
     );
 
 }
@@ -155,7 +160,7 @@ const styles = StyleSheet.create({
       },
       inputStyle: { 
           fontSize: 16,
-          color: 'black'
+          color: 'white'
       },
       labelStyle: {
         fontSize: 14,
@@ -165,6 +170,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 4,
         marginLeft: -4,
       },
+      placeholderStyle: {
+        color: 'white'
+      },
     submitButtonView: {
         marginVertical: 10
     },
@@ -172,9 +180,12 @@ const styles = StyleSheet.create({
         display: 'flex',
         justifyContent: 'center',
         alignContent: 'center',
+        alignSelf: 'center',
         height: 50,
         marginTop: 40,
-        backgroundColor: '#112233'
+        backgroundColor: 'red',
+        borderRadius: 30,
+        width: '40%'
     },
     submitText: {
         color: 'white',
@@ -182,6 +193,7 @@ const styles = StyleSheet.create({
         fontSize: 18
     },
     topTitle: {
-        marginBottom: 10
+        marginBottom: 10,
+        color: 'white'
     },
 })
