@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { TextInput } from "react-native-element-textinput";
 import { AutoComplete } from 'react-native-element-textinput';
 import { AuthContext } from "../context/AuthContext"
+import { ThemeContext } from "../context/ThemeContext"
 import { 
     getAllRegisteredFarmers, 
     recharge,
@@ -25,6 +26,7 @@ export default function CardRecharge({ navigation }) {
     const responseMsg = useSelector(getSuccessMsg);
     const errorMsg = useSelector(getError);
     const { user } = useContext(AuthContext);
+    const { appColor } = useContext(ThemeContext);
     
     dispatch = useDispatch();
 
@@ -80,21 +82,20 @@ export default function CardRecharge({ navigation }) {
     }
 
     return (
-        <View style={{padding: 10, flex: 1}}>
-            <Text style={styles.topTitle}>Card Recharge</Text>           
+        <View style={{padding: 10, flex: 1, backgroundColor: appColor}}>        
             {
                 (status === appStates.LOADING) ? <ActivityIndicator /> 
                 :
                 registeredFarmers.length == 0 ? 
-                <Text style={{textAlign:'center'}}>
+                <Text style={{textAlign:'center', color: 'white'}}>
                     You have no farmers available. {'\n'}
                     Add a farmer from the 
-                    <Text style={{color: 'blue'}}
+                    <Text style={{color: 'white', textDecorationLine: 'underline'}}
                         onPress={() => navigation.navigate('RegisterFarmer')}
                     > add farmer page</Text>
                      to be able to make an order!</Text>
                 :
-                <View>
+                <View style={{marginTop: '50%'}}>
                 <TextInput 
                 style={styles.input} 
                 inputStyle={styles.inputStyle}
@@ -144,6 +145,7 @@ const styles = StyleSheet.create({
         borderWidth: 0.5,
         borderColor: '#DDDDDD',
         marginVertical: 10,
+        backgroundColor: 'white'
       },
       inputStyle: { 
           fontSize: 16,
@@ -164,9 +166,12 @@ const styles = StyleSheet.create({
         display: 'flex',
         justifyContent: 'center',
         alignContent: 'center',
+        alignSelf: 'center',
         height: 50,
+        width: '40%',
         marginTop: 40,
-        backgroundColor: '#112233'
+        backgroundColor: 'red',
+        borderRadius: 30
     },
     submitText: {
         color: 'white',

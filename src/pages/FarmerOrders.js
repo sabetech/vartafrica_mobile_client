@@ -162,10 +162,6 @@ export default function FarmerOrders ({ navigation }) {
             chksum++;
         }
 
-        // if (!validateVariety()){
-        //     chksum++;
-        // }
-
         if (chksum > 0) return false
         return true;
     }
@@ -192,10 +188,6 @@ export default function FarmerOrders ({ navigation }) {
     }
 
     const varietyControl = (key) => {
-        
-        console.log("Is valid varirty: ", isValidVariety[key])
-        console.log("value of key: ", key)
-        console.log("current valid array: ", isValidVariety)
 
         return (
             <View style={styles.varietyControls} key={key}>
@@ -208,8 +200,6 @@ export default function FarmerOrders ({ navigation }) {
                 inputStyle={styles.inputStyle}
                 labelStyle={styles.labelStyle}
                 placeholderStyle={styles.placeholderStyleAutoComplete}
-                // textError={isValidVariety[key] ? "" : "Invalid Variety"}
-                // textErrorStyle={styles.textErrorStyleAutoComplete}
                 label="Variety/Specification (Type to Search)"
                 placeholder="..."
                 placeholderTextColor="gray"
@@ -233,7 +223,7 @@ export default function FarmerOrders ({ navigation }) {
                         onChangeText={(text) => handleUnitPriceChanged(text, key)} value={ unit_price[key] } />
 
                     {/* ////// USING REACT NATIVE TextInput HERE DIFFERENT FROM TextInput FROM A LIBRARY /////// */}
-                    <Text>Total Amount (UGX) (quantity * price)</Text>
+                    <Text style={styles.labelText}>Total Amount (UGX) (quantity * price)</Text>
                     <Ti 
                         style={ styles.input } 
                         value={ total_price[key] }
@@ -274,23 +264,22 @@ export default function FarmerOrders ({ navigation }) {
     const removeLastElementAtLastPosition = (prev) => prev.filter((_, i) => i < (prev.length - 1));
 
     return (
-        <View style={{padding: 10, flex: 1}}>
-            <Text style={styles.topTitle}>Order Form</Text>
+        <View style={{padding: 10, flex: 1, backgroundColor: appColor}}> 
             {   
                 (status === 'loading') ? <ActivityIndicator /> 
                 :
                 registeredFarmers.length == 0 ? 
-                <Text style={{textAlign:'center'}}>
+                <Text style={{textAlign:'center', color: 'white'}}>
                     You have no farmers available. {'\n'}
                     Add a farmer from the 
-                    <Text style={{color: 'blue'}}
+                    <Text style={{color: 'white', textDecorationLine: 'underline'}}
                         onPress={() => navigation.navigate('RegisterFarmer')}
                     > add farmer page</Text>
                      to be able to make an order!</Text>
                 :
             
             <ScrollView>
-            <Text>Select Farmer</Text>
+            <Text style={{color: 'white'}}>Select Farmer</Text>
             <AutoComplete
                 value={selectedFarmer}
                 data={[...
@@ -341,7 +330,7 @@ export default function FarmerOrders ({ navigation }) {
                     }}>
                         <Text style={styles.varietyText}>ADD VARITEY (+)</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={varietyViewControls.length > 1 ? styles.varietyMod : styles.varietyModDisabled} onPress={() => {
+                    <TouchableOpacity style={varietyViewControls.length > 1 ? styles.removeVariety : styles.varietyModDisabled} onPress={() => {
                         removeVarietyControls();
                     }}
                         disabled={varietyViewControls.length == 1}
@@ -352,7 +341,7 @@ export default function FarmerOrders ({ navigation }) {
                 </View>
                 
                 <View style={styles.switchInput}>
-                    <Text style={{fontSize: 16}}>Use Percentage Discount</Text>
+                    <Text style={{fontSize: 16, color: 'white'}}>Use Percentage Discount</Text>
                     <Switch
                         trackColor={{ false: "#767577", true: "#56439D" }}
                         thumbColor={isDiscountPercentageEnabledEnabled ? "#28166A" : "#f4f3f4"}
@@ -396,10 +385,12 @@ const styles = StyleSheet.create({
         borderWidth: 0.5,
         borderColor: '#DDDDDD',
         marginVertical: 10,
+        backgroundColor: 'white'
       },
       inputStyle: { 
           fontSize: 16,
           color: 'black'
+          
       },
       labelStyle: {
         fontSize: 14,
@@ -424,18 +415,21 @@ const styles = StyleSheet.create({
         alignContent: 'center',
         height: 50,
         marginTop: 40,
-        backgroundColor: '#112233'
+        width: '40%',
+        backgroundColor: 'red',
+        alignSelf: 'center',
+        borderRadius: 30
     },
     submitText: {
         color: 'white',
         textAlign: 'center'        
     },
     topTitle: {
-        marginBottom: 10
+        marginBottom: 10, 
+        color: 'white'
     },
     varietyControls: {
         padding: 11,
-        backgroundColor: '#F1EBFC',
         marginVertical: 5
     },
     varietyButtons: {
@@ -444,16 +438,23 @@ const styles = StyleSheet.create({
         
     },
     varietyMod: {
-        width: '50%',
+        width: '45%',
         height: 40,
-        backgroundColor: '#242233',
+        backgroundColor: 'red',
+        padding: 10,
+        borderRadius: 8
+    },
+    removeVariety: {
+        width: '45%',
+        height: 40,
+        backgroundColor: 'black',
         padding: 10,
         borderRadius: 8
     },
     varietyModDisabled: {
-        width: '50%',
+        width: '45%',
         height: 40,
-        backgroundColor: '#9a96b8',
+        backgroundColor: 'black',
         padding: 10,
         borderRadius: 8
     },
@@ -461,6 +462,9 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: 'white'
     },
+    labelText: {
+        color: 'white'
+    },  
     inputAutocomplete: {
         height: 55,
         paddingHorizontal: 12,
